@@ -359,6 +359,13 @@ sudo apt install python3-venv python3-pip
 4. Verifier `outputs/jour1/figures/jour1_overview.png`.
 5. Lire et commenter les metriques.
 
+Sortie attendue (ordre de grandeur):
+
+- `iou_score`: une valeur strictement entre 0 et 1 (souvent autour de 0.5 a 0.9 selon `shift`).
+- `hog_dimension`: valeur fixe strictement positive (depend des parametres HOG).
+- `hog_different_l2` > `hog_shifted_l2` dans la majorite des cas.
+- `sift_good_matches_similar` > `sift_good_matches_different` dans la majorite des cas.
+
 ### 8.4 Verification (checkpoints)
 
 - Checkpoint A: `iou_score` est strictement superieur a 0 et inferieur ou egal a 1.
@@ -382,6 +389,18 @@ Lecture rapide des checkpoints:
 - Script principal de lab: `labs/jour1/day1_lab.py`.
 - Validation syntaxique: `python3 -m py_compile labs/jour1/day1_lab.py`.
 - Validation fonctionnelle attendue: execution avec generation des deux artefacts (`metrics.json` et `jour1_overview.png`).
+
+Commande de verification rapide:
+
+```bash
+python3 -m py_compile labs/jour1/day1_lab.py && python3 labs/jour1/day1_lab.py
+```
+
+Interpretation rapide de `metrics.json`:
+
+- Si `iou_score` est faible, revoir le decalage (`shift`) ou la segmentation.
+- Si `hog_shifted_l2` et `hog_different_l2` sont proches, augmenter la difference visuelle entre scenes.
+- Si `sift_good_matches_different` devient trop eleve, durcir le ratio test (ex: `0.75` -> `0.65`).
 
 ## 9. Resume et points a retenir
 
