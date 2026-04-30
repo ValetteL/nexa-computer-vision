@@ -2,27 +2,41 @@
 
 ## 1. Objectif du chapitre
 
-- Comprendre les differences entre classification, detection et reconnaissance.
-- Maitriser un pipeline de base en vision par ordinateur.
-- Manipuler des images avec OpenCV.
-- Introduire HOG et SIFT comme premieres representations visuelles.
+- Comprendre clairement la difference entre classification, detection et reconnaissance.
+- Construire un pipeline vision simple et robuste.
+- Manipuler les images avec OpenCV: lecture, conversion, seuillage, boites englobantes.
+- Calculer et interpreter des metriques de base (IoU, distances entre descripteurs).
+- Extraire et comparer des features HOG et SIFT sur des cas concrets.
 
 ## 2. Introduction (importance du chapitre)
 
-La vision par ordinateur permet d'extraire de l'information exploitable depuis des images ou des videos. Ce chapitre est fondamental car il donne la base conceptuelle et pratique qui sera reutilisee pour les CNN, Faster R-CNN et YOLO.
+Cette journee pose les bases pratiques de toute la suite du cours (CNN, Faster R-CNN, YOLO). L'objectif n'est pas seulement de connaitre des definitions, mais de produire un mini pipeline qui tourne, genere des resultats mesurables, et permet de justifier une decision technique.
+
+Cas metier typiques:
+
+- Controle qualite industriel: detecter un defaut et mesurer son recouvrement avec une zone attendue.
+- Retail: reperer des objets sur rayon, puis reconnaitre une reference precise.
+- Vision embarquee: detecter rapidement un obstacle ou une signalisation.
 
 ## 3. Prerequis
 
-- Python 3 installe.
-- Bases sur les tableaux `numpy`.
-- Environnement virtuel Python.
+- Python 3.
+- Bases en `numpy` (tableaux, dimensions).
+- Bases Linux terminal.
+- OpenCV, NumPy, Matplotlib installes.
 
 ## 4. Concepts cles
 
-- **Classification**: predire une classe globale pour une image.
-- **Detection**: localiser et classifier des objets avec des boites.
-- **Reconnaissance**: identifier un objet/individu precis.
-- **Feature**: representation numerique de l'information visuelle.
+- **Classification**: une image -> une etiquette globale.
+- **Detection**: une image -> plusieurs boites + etiquettes.
+- **Reconnaissance**: une image/zone -> identite fine (personne, produit, logo).
+- **Feature**: representation numerique d'une image pour comparer, classer, matcher.
+
+Exemple concret:
+
+- Classification: "il y a une voiture".
+- Detection: "voiture en `(x1, y1, x2, y2)`".
+- Reconnaissance: "cette voiture est le modele X".
 
 ## 5. Formulation mathematique (quand necessaire)
 
@@ -34,7 +48,7 @@ $$
 IoU = \frac{|B_p \cap B_{gt}|}{|B_p \cup B_{gt}|}
 $$
 
-Distance euclidienne entre deux descripteurs (matching SIFT):
+Distance euclidienne entre descripteurs:
 
 $$
 d(\mathbf{x}, \mathbf{y}) = \sqrt{\sum_{i=1}^{n}(x_i - y_i)^2}
@@ -44,32 +58,32 @@ $$
 
 - $B_p$: boite predite.
 - $B_{gt}$: boite verite terrain.
-- $|\cdot|$: aire d'une region.
-- $\mathbf{x}, \mathbf{y}$: vecteurs descripteurs.
-- $n$: dimension descripteur.
+- $|\cdot|$: aire.
+- $\mathbf{x}, \mathbf{y}$: vecteurs de features.
+- $n$: dimension du vecteur.
 
 ### 5.3 Decomposition mathematique pas a pas
 
 Pour l'IoU:
 
 $$
-\text{Etape 1: calculer l'aire d'intersection } |B_p \cap B_{gt}|
+\text{Etape 1: } A_{inter} = |B_p \cap B_{gt}|
 $$
 
 $$
-\text{Etape 2: calculer l'aire d'union } |B_p \cup B_{gt}| = |B_p| + |B_{gt}| - |B_p \cap B_{gt}|
+\text{Etape 2: } A_{union} = |B_p| + |B_{gt}| - A_{inter}
 $$
 
 $$
-\text{Etape 3: diviser intersection par union}
+\text{Etape 3: } IoU = \frac{A_{inter}}{A_{union}}
 $$
 
 ### 5.4 Exemple numerique guide
 
-Si $|B_p|=1200$, $|B_{gt}|=1000$, $|B_p \cap B_{gt}|=800$:
+Si $|B_p|=1200$, $|B_{gt}|=1000$, $A_{inter}=800$:
 
 $$
-|B_p \cup B_{gt}| = 1200 + 1000 - 800 = 1400
+A_{union} = 1200 + 1000 - 800 = 1400
 $$
 
 $$
@@ -78,85 +92,141 @@ $$
 
 ### 5.5 Resultat attendu et interpretation
 
-- IoU proche de 1: tres bonne superposition.
-- IoU proche de 0: mauvaise localisation.
-- En detection, un seuil typique d'acceptation commence souvent a $0.5$.
+- $IoU \approx 0.57$: detection correcte mais perfectible.
+- Seuil courant en detection classique: $IoU \ge 0.5$.
+- Plus le seuil est haut, plus la localisation exigee est precise.
 
 ## 6. Exemple Python complet (code commente)
 
+Le script complet est dans `labs/jour1/day1_lab.py`.
+
 ```python
+import json
+from pathlib import Path
+
 import cv2
-import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 
-# 1) Charger une image en BGR puis convertir en RGB pour affichage
-img_bgr = cv2.imread("data/image.jpg")
-if img_bgr is None:
-    raise FileNotFoundError("Image introuvable: data/image.jpg")
-img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+matplotlib.use("Agg")
 
-# 2) Pretraitements simples
-img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-img_resized = cv2.resize(img_gray, (128, 64), interpolation=cv2.INTER_AREA)
-_, img_thresh = cv2.threshold(img_gray, 127, 255, cv2.THRESH_BINARY)
 
-# 3) HOG
-hog = cv2.HOGDescriptor(
-    _winSize=(128, 64),
-    _blockSize=(16, 16),
-    _blockStride=(8, 8),
-    _cellSize=(8, 8),
-    _nbins=9,
-)
-hog_features = hog.compute(img_resized)
+def make_synthetic_scene(shape: str, shift: int = 0) -> np.ndarray:
+    img = np.zeros((256, 256, 3), dtype=np.uint8)
+    if shape == "rectangle":
+        cv2.rectangle(img, (40 + shift, 60), (180 + shift, 190), (255, 255, 255), -1)
+    elif shape == "circle":
+        cv2.circle(img, (120 + shift, 130), 60, (255, 255, 255), -1)
+    else:
+        raise ValueError("shape must be 'rectangle' or 'circle'")
+    return img
 
-# 4) SIFT
-sift = cv2.SIFT_create()
-keypoints, descriptors = sift.detectAndCompute(img_gray, None)
-img_kp = cv2.drawKeypoints(
-    img_gray,
-    keypoints,
-    None,
-    flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS,
-)
 
-# 5) Affichage
-fig, axs = plt.subplots(1, 3, figsize=(15, 4))
-axs[0].imshow(img_rgb)
-axs[0].set_title("Image RGB")
-axs[0].axis("off")
+def iou(box_a, box_b):
+    x_left = max(box_a[0], box_b[0])
+    y_top = max(box_a[1], box_b[1])
+    x_right = min(box_a[2], box_b[2])
+    y_bottom = min(box_a[3], box_b[3])
 
-axs[1].imshow(img_thresh, cmap="gray")
-axs[1].set_title("Seuillage binaire")
-axs[1].axis("off")
+    if x_right <= x_left or y_bottom <= y_top:
+        return 0.0
 
-axs[2].imshow(img_kp, cmap="gray")
-axs[2].set_title("Points cles SIFT")
-axs[2].axis("off")
+    inter = (x_right - x_left) * (y_bottom - y_top)
+    area_a = (box_a[2] - box_a[0]) * (box_a[3] - box_a[1])
+    area_b = (box_b[2] - box_b[0]) * (box_b[3] - box_b[1])
+    union = area_a + area_b - inter
+    return inter / union
 
-plt.tight_layout()
-plt.show()
 
-print("Dimension HOG:", hog_features.shape)
-print("Nombre de keypoints SIFT:", len(keypoints))
-print("Shape descriptors SIFT:", None if descriptors is None else descriptors.shape)
+def bbox_from_threshold(img_gray):
+    _, th = cv2.threshold(img_gray, 127, 255, cv2.THRESH_BINARY)
+    points = cv2.findNonZero(th)
+    x, y, w, h = cv2.boundingRect(points)
+    return (x, y, x + w, y + h)
+
+
+def hog_features(gray_img):
+    resized = cv2.resize(gray_img, (128, 64), interpolation=cv2.INTER_AREA)
+    hog = cv2.HOGDescriptor((128, 64), (16, 16), (8, 8), (8, 8), 9)
+    return hog.compute(resized)
+
+
+def sift_features(gray_img):
+    sift = cv2.SIFT_create()
+    return sift.detectAndCompute(gray_img, None)
+
+
+img_gt = make_synthetic_scene("rectangle", shift=0)
+img_pred = make_synthetic_scene("rectangle", shift=12)
+img_other = make_synthetic_scene("circle", shift=0)
+
+gray_gt = cv2.cvtColor(img_gt, cv2.COLOR_BGR2GRAY)
+gray_pred = cv2.cvtColor(img_pred, cv2.COLOR_BGR2GRAY)
+gray_other = cv2.cvtColor(img_other, cv2.COLOR_BGR2GRAY)
+
+box_gt = bbox_from_threshold(gray_gt)
+box_pred = bbox_from_threshold(gray_pred)
+iou_score = iou(box_pred, box_gt)
+
+hog_gt = hog_features(gray_gt)
+hog_pred = hog_features(gray_pred)
+hog_other = hog_features(gray_other)
+
+kp_gt, desc_gt = sift_features(gray_gt)
+kp_pred, desc_pred = sift_features(gray_pred)
+kp_other, desc_other = sift_features(gray_other)
+
+bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=False)
+matches_similar = bf.knnMatch(desc_gt, desc_pred, k=2)
+matches_different = bf.knnMatch(desc_gt, desc_other, k=2)
+
+
+def ratio_count(matches, ratio=0.75):
+    good = 0
+    for pair in matches:
+        if len(pair) < 2:
+            continue
+        m, n = pair
+        if m.distance < ratio * n.distance:
+            good += 1
+    return good
+
+
+results = {
+    "iou_score": float(iou_score),
+    "hog_dimension": int(hog_gt.shape[0]),
+    "hog_shifted_l2": float(np.linalg.norm(hog_gt - hog_pred)),
+    "hog_different_l2": float(np.linalg.norm(hog_gt - hog_other)),
+    "sift_kp_gt": len(kp_gt),
+    "sift_kp_pred": len(kp_pred),
+    "sift_kp_other": len(kp_other),
+    "sift_good_matches_similar": ratio_count(matches_similar),
+    "sift_good_matches_different": ratio_count(matches_different),
+}
+
+Path("outputs/jour1").mkdir(parents=True, exist_ok=True)
+Path("outputs/jour1/metrics.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
+print(json.dumps(results, indent=2))
 ```
 
 ## 7. Explication detaillee du code
 
-- Bloc 1: charge l'image et gere explicitement le cas d'erreur de chemin.
-- Bloc 2: applique des transformations de base utiles en preprocessing.
-- Bloc 3: extrait un vecteur HOG global de taille fixe.
-- Bloc 4: detecte des points SIFT et calcule leurs descripteurs locaux.
-- Bloc 5: visualise les sorties pour verifier rapidement la qualite.
+- Bloc 1: cree des scenes synthetiques pour eviter toute dependance a un dataset externe.
+- Bloc 2: calcule automatiquement des boites par seuillage et en deduit l'IoU.
+- Bloc 3: extrait HOG pour comparer deux formes proches vs differentes.
+- Bloc 4: extrait SIFT puis compare les matches "similaires" et "differents" via ratio test.
+- Bloc 5: sauvegarde les metriques dans `outputs/jour1/metrics.json` pour tracabilite.
 
 ## 8. Lab pas a pas (tres guide)
 
 ### 8.1 Objectif du lab
 
-Comparer HOG et SIFT sur un mini jeu de donnees et interpreter les differences.
+Construire un pipeline de comparaison entre scenes, mesurer IoU, HOG, SIFT, puis interpreter les metriques.
 
 ### 8.2 Setup environnement
+
+Si `venv` est disponible:
 
 ```bash
 python3 -m venv .venv
@@ -165,43 +235,58 @@ pip install -U pip
 pip install opencv-python numpy matplotlib
 ```
 
+Si `venv` n'est pas disponible (cas Debian minimal):
+
+```bash
+sudo apt install python3-venv python3-pip
+python3 -m venv .venv
+source .venv/bin/activate
+pip install opencv-python numpy matplotlib
+```
+
 ### 8.3 Etapes d'execution
 
-1. Creer `data/` et ajouter au moins 10 images.
-2. Creer `lab_jour1.py` avec le code de la section 6.
-3. Executer `python3 lab_jour1.py`.
-4. Verifier les 3 affichages (RGB, seuillage, keypoints).
-5. Noter les dimensions HOG et le nombre de keypoints.
-6. Refaire l'experience sur plusieurs images et comparer.
+1. Verifier la presence du script `labs/jour1/day1_lab.py`.
+2. Lancer `python3 labs/jour1/day1_lab.py`.
+3. Verifier que `outputs/jour1/metrics.json` existe.
+4. Verifier que `outputs/jour1/figures/jour1_overview.png` existe.
+5. Lire les metriques et comparer cas "similaire" vs "different".
 
 ### 8.4 Verification (checkpoints)
 
-- Checkpoint A: le script s'execute sans erreur.
-- Checkpoint B: `Dimension HOG` est non nulle.
-- Checkpoint C: `Nombre de keypoints SIFT` varie selon l'image.
+- Checkpoint A: `iou_score` est dans l'intervalle $(0,1]$.
+- Checkpoint B: `hog_different_l2` est generalement plus grand que `hog_shifted_l2`.
+- Checkpoint C: `sift_good_matches_similar` est superieur a `sift_good_matches_different`.
 
 ### 8.5 Erreurs frequentes et correction
 
-- Erreur `Image introuvable` -> chemin faux -> corriger `data/image.jpg`.
-- Erreur SIFT indisponible -> version OpenCV inadaptee -> mettre a jour `opencv-python`.
-- Affichage couleurs incorrect -> oubli conversion BGR->RGB -> utiliser `cv2.cvtColor`.
+- `ModuleNotFoundError: cv2` -> OpenCV non installe -> installer `opencv-python`.
+- `No module named pip/venv` -> systeme minimal -> installer `python3-pip` et `python3-venv`.
+- `desc_* is None` (peu probable sur ces scenes) -> verifier que les formes sont bien dessinees en blanc sur fond noir.
 
-## 9. Resume et points a retenir
+## 9. Validation technique du code
 
-- Classification, detection et reconnaissance sont trois taches differentes.
-- L'IoU est une mesure cle pour evaluer une localisation.
-- HOG donne une representation globale des gradients.
-- SIFT fournit des points clefs et descripteurs locaux robustes.
-- Les visualisations intermediaires accelerent le debug.
+- Validation effectuee dans cet environnement: verification syntaxique reussie avec `python3 -m py_compile labs/jour1/day1_lab.py`.
+- Execution complete bloquee ici par absence de `pip/venv` systeme, donc dependances OpenCV/NumPy/Matplotlib non installables localement sans paquets OS.
+- Commande d'execution a lancer des que dependances installees: `python3 labs/jour1/day1_lab.py`.
 
-## 10. Mini exercices
+## 10. Resume et points a retenir
 
-- Exercice 1: modifier le seuil binaire et comparer l'effet.
-- Exercice 2: changer la taille d'image HOG et observer la dimension de sortie.
-- Exercice 3: comparer deux images avec une distance moyenne entre descripteurs SIFT.
+- La distinction classification/detection/reconnaissance est indispensable avant les modeles deep.
+- L'IoU formalise la qualite de localisation.
+- HOG est une base solide pour decrire les contours globaux.
+- SIFT est utile pour la similarite locale et le matching.
+- Un cours exploitable doit produire metriques + artefacts de sortie, pas seulement de la theorie.
 
-## 11. Livrables attendus
+## 11. Mini exercices
 
-- Script `lab_jour1.py` fonctionnel.
-- Dossier de sorties visuelles.
-- Court compte-rendu avec interpretation des resultats.
+- Exercice 1: modifier `shift` de 12 a 30 et observer l'impact sur $IoU$.
+- Exercice 2: remplacer le rectangle par un ellipse et comparer HOG.
+- Exercice 3: faire varier le ratio test SIFT (0.6, 0.75, 0.9) et analyser le compromis precision/rappel de matching.
+
+## 12. Livrables attendus
+
+- Script `labs/jour1/day1_lab.py` execute sans erreur.
+- `outputs/jour1/metrics.json`.
+- `outputs/jour1/figures/jour1_overview.png`.
+- Mini rapport d'interpretation (5 a 10 lignes).
