@@ -17,7 +17,7 @@ Le contenu de ce chapitre couvre intégralement les deux blocs du Jour 1 :
 
 ## 3. Introduction
 
-Ce premier chapitre constitue la base méthodologique du module. Avant d'utiliser des réseaux de neurones, il est indispensable de savoir :
+Ce premier chapitre constitue le socle méthodologique du module. Avant d'utiliser des réseaux de neurones, il est indispensable de savoir :
 
 - formuler correctement le problème,
 - préparer les données visuelles,
@@ -29,7 +29,7 @@ La logique de travail attendue est la suivante :
 1. définir l'objectif,
 2. transformer l'image pour extraire une information utile,
 3. calculer des mesures,
-4. interpréter les résultats selon un critère métier.
+4. interpréter les résultats selon des critères métier explicites.
 
 ## 4. Prérequis
 
@@ -90,7 +90,7 @@ flowchart LR
 - Attendu : localisation fiable de la zone d'intérêt.
 - Mesure clé : IoU entre boîte prédite et boîte de référence.
 
-#### Cas 2 — Retail
+#### Cas 2 — Commerce de détail
 
 - Problème : compter et identifier des produits en rayon.
 - Attendu : boîtes cohérentes + classe correcte par produit.
@@ -203,7 +203,7 @@ Points importants :
 
 - sensible à la géométrie globale,
 - robuste pour des formes contrastées,
-- souvent utilisé en baseline classique.
+- souvent utilisé comme référence de départ en vision classique.
 
 ### 7.2 SIFT
 
@@ -363,7 +363,7 @@ Diagnostic rapide :
 
 - IoU faible : vérifier seuillage, boîtes et décalage.
 - Distances HOG trop proches : augmenter l'écart visuel entre scènes.
-- Matching SIFT trop permissif : réduire le ratio test.
+- Matching SIFT trop permissif : réduire le ratio du test.
 
 ### 10.8 Parcours progressif recommandé
 
