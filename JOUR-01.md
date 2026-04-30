@@ -238,6 +238,7 @@ flowchart TB
 ## 8. Exemple Python minimal
 
 Cet exemple est volontairement minimal et se concentre sur le calcul de l'IoU.
+Il est aussi disponible en fichier exécutable : `labs/jour1/day1_minimal_iou.py`.
 Le script principal complet du chapitre reste `labs/jour1/day1_lab.py`.
 
 ```python
