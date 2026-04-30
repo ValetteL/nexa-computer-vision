@@ -1,6 +1,5 @@
 # Syllabus
-
-## Mastère 1
+# Master 1 Data iA
 
 ## Détection et reconnaissance d'objets
 
@@ -75,9 +74,6 @@
 - Etude de cas
 - Partiel S2
 
-## Intervenant.e.s
-
-- Formateurs experts en Data Scientist / Machine Engineer, avec une expérience dans le domaine
 
 ## Bloc 3
 
@@ -85,12 +81,3 @@
 - **A3.2** Utilisation d'un algorithme d'apprentissage supervisé machine learning ou deep learning
 - **A3.3** Evaluation des performances d'un modèle
 - **A3.4** Optimisation des performances d'un algorithme d'apprentissage supervisé
-
-## Horaires de la formation
-
-- Matin : **9h-12h30**
-- Après-midi : **13h30-17h**
-
-## Indicateur de satisfaction
-
-- Taux de satisfaction des participants, recueilli via un questionnaire en fin de module.
