@@ -1,161 +1,172 @@
-# Jour 1 - Fondamentaux de vision par ordinateur et descripteurs classiques
+# Jour 1 — Fondamentaux de vision par ordinateur et descripteurs classiques
 
-## 1. Objectif du chapitre
+## 1. Objectifs d'apprentissage
 
-- Distinguer classification, detection et reconnaissance sans ambiguite.
-- Construire un pipeline complet image -> features -> mesure -> interpretation.
-- Manipuler OpenCV pour pretraiter, segmenter et visualiser.
-- Comprendre HOG et SIFT avec intuition, maths et comparaison pratique.
-- Produire des livrables testables et reproductibles.
+- Distinguer sans ambiguïté les tâches de classification, de détection et de reconnaissance.
+- Comprendre la chaîne complète d'un pipeline de vision, de l'acquisition à l'interprétation métier.
+- Maîtriser les opérations de base avec OpenCV : conversion, seuillage, extraction de région et visualisation.
+- Étudier deux familles de descripteurs classiques (HOG et SIFT) et savoir les comparer sur des cas concrets.
+- Produire des résultats reproductibles, mesurables et exploitables dans un contexte professionnel.
 
-Alignement syllabus Jour 1:
+## 2. Positionnement dans le syllabus
 
-- Bloc A (3h30): S'introduire a la vision par ordinateur.
-- Bloc B (3h30): Decrire des images avec descripteurs classiques.
+Le contenu de ce chapitre couvre intégralement les deux blocs du Jour 1 :
 
-## 2. Introduction (importance du chapitre)
+- Bloc A (3 h 30) : introduction à la vision par ordinateur.
+- Bloc B (3 h 30) : description d'images par descripteurs.
 
-Le Jour 1 construit la base methodologique du module. Avant les CNN et detecteurs modernes, il faut savoir poser le probleme, transformer l'image utilement, puis mesurer objectivement la qualite des resultats.
+## 3. Introduction
 
-Sans cette base, on risque de lancer des modeles "boite noire" sans comprendre pourquoi ils reussissent ou echouent.
+Ce premier chapitre constitue la base méthodologique du module. Avant d'utiliser des réseaux de neurones, il est indispensable de savoir :
 
-## 3. Prerequis
+- formuler correctement le problème,
+- préparer les données visuelles,
+- choisir des représentations pertinentes,
+- mesurer la qualité des résultats avec des indicateurs explicites.
+
+La logique de travail attendue est la suivante :
+
+1. définir l'objectif,
+2. transformer l'image pour extraire une information utile,
+3. calculer des mesures,
+4. interpréter les résultats selon un critère métier.
+
+## 4. Prérequis
 
 - Python 3.
-- Bases `numpy` (tableaux, dimensions, operations elementaires).
-- Bases image (pixel, canaux, niveaux de gris).
-- OpenCV, NumPy, Matplotlib installes.
+- Bases sur les tableaux `numpy`.
+- Notions de base sur les pixels, les canaux et les niveaux de gris.
+- Bibliothèques installées : OpenCV, NumPy, Matplotlib.
 
-## 4. Concepts cles
+## 5. Concepts fondamentaux
 
-### 4.1 Classification
+### 5.1 Classification
 
-- Entree: image complete.
-- Sortie: une seule classe.
-- Question: "Qu'y a-t-il dans l'image ?"
+- Entrée : image complète.
+- Sortie : une classe globale.
+- Question métier typique : « Quel type d'objet est présent dans l'image ? »
 
-### 4.2 Detection
+### 5.2 Détection
 
-- Entree: image complete.
-- Sortie: boites + classes + scores.
-- Question: "Ou sont les objets et quels sont-ils ?"
+- Entrée : image complète.
+- Sortie : boîtes englobantes + classes + scores.
+- Question métier typique : « Où se trouvent les objets et de quelle catégorie sont-ils ? »
 
-### 4.3 Reconnaissance
+### 5.3 Reconnaissance
 
-- Entree: objet ou region detectee.
-- Sortie: identite fine (personne, logo, reference produit).
-- Question: "Quel objet exact est present ?"
+- Entrée : objet ou région déjà localisée.
+- Sortie : identité fine (personne, produit, logo, référence).
+- Question métier typique : « Quel objet précis est observé ? »
 
-### 4.4 Schema de positionnement des taches
+### 5.4 Schéma de positionnement des tâches
 
 ```mermaid
 flowchart LR
     A[Image brute] --> B[Classification]
-    A --> C[Detection]
+    A --> C[Détection]
     C --> D[Reconnaissance]
     B --> E[Classe globale]
-    C --> F[Boites + classes]
-    D --> G[Identite fine]
+    C --> F[Boîtes + classes]
+    D --> G[Identité fine]
 ```
 
-### 4.5 Pipeline vision complet
+### 5.5 Pipeline de vision de bout en bout
 
 ```mermaid
 flowchart LR
-    A[Acquisition image/video] --> B[Pretraitement]
-    B --> C[Extraction de features]
-    C --> D[Apprentissage ou regles]
-    D --> E[Prediction]
-    E --> F[Evaluation]
-    F --> G[Interpretation metier]
+    A[Acquisition] --> B[Prétraitement]
+    B --> C[Extraction de caractéristiques]
+    C --> D[Apprentissage ou règles]
+    D --> E[Prédiction]
+    E --> F[Évaluation]
+    F --> G[Interprétation métier]
 ```
 
-### 4.6 Mini cas concrets
+### 5.6 Cas d'usage concrets
 
-- Industrie: verifier un joint -> IoU + seuil qualite.
-- Retail: detecter et reconnaitre des produits -> precision/rappel + erreurs de confusion.
-- Route: detecter pietons/vehicules -> compromis precision/rappel en temps reel.
+#### Cas 1 — Contrôle qualité industriel
 
-### 4.7 Schema visuel HOG vs SIFT
+- Problème : vérifier la présence et la position d'un composant.
+- Attendu : localisation fiable de la zone d'intérêt.
+- Mesure clé : IoU entre boîte prédite et boîte de référence.
 
-```mermaid
-flowchart LR
-    A[Image] --> B[HOG]
-    A --> C[SIFT]
-    B --> B1[Descripteur global\nstructure/contours]
-    C --> C1[Points cles locaux\nmatching robuste]
-    B1 --> D[Usage: baseline classification]
-    C1 --> E[Usage: similarite/reconnaissance locale]
-```
+#### Cas 2 — Retail
 
-```mermaid
-flowchart TB
-    A[Scene proche\nrectangle decale] --> B[Distance HOG faible]
-    C[Scene differente\nrectangle vs cercle] --> D[Distance HOG plus elevee]
-    E[Scene proche] --> F[Plus de bons matches SIFT]
-    G[Scene differente] --> H[Moins de bons matches SIFT]
-```
+- Problème : compter et identifier des produits en rayon.
+- Attendu : boîtes cohérentes + classe correcte par produit.
+- Mesures clés : précision/rappel de détection, erreurs de confusion.
 
-## 5. Formulation mathematique (quand necessaire)
+#### Cas 3 — Vidéo routière
 
-### 5.1 Contexte mathematique
+- Problème : détecter piétons et véhicules en flux.
+- Attendu : bon compromis qualité/vitesse.
+- Mesures clés : rappel, précision, latence par image.
 
-Deux besoins complementaires:
+## 6. Fondements mathématiques
 
-- mesurer la qualite de localisation (IoU),
-- mesurer la proximite visuelle entre representations (distance).
+### 6.1 Contexte
 
-### 5.2 Symboles et notations
+Deux besoins distincts apparaissent dès le Jour 1 :
 
-- $B_p$: boite predite.
-- $B_{gt}$: boite verite terrain.
-- $A_{inter}$: aire d'intersection.
-- $A_{union}$: aire d'union.
-- $\mathbf{x}, \mathbf{y}$: vecteurs descripteurs.
-- $n$: dimension du descripteur.
+- évaluer la qualité de localisation,
+- évaluer la similarité visuelle entre représentations.
 
-### 5.3 Formules en format math
+### 6.2 Symboles et notations
+
+- $B_p$ : boîte prédite.
+- $B_{gt}$ : boîte de référence.
+- $A_{inter}$ : aire d'intersection.
+- $A_{union}$ : aire d'union.
+- $\mathbf{x}, \mathbf{y}$ : vecteurs de descripteurs.
+- $x_i, y_i$ : composantes des vecteurs.
+- $n$ : dimension descripteur.
+
+### 6.3 Formules
+
+Intersection over Union :
 
 $$
 IoU = \frac{|B_p \cap B_{gt}|}{|B_p \cup B_{gt}|}
 $$
 
+Distance euclidienne entre descripteurs :
+
 $$
 d(\mathbf{x}, \mathbf{y}) = \sqrt{\sum_{i=1}^{n}(x_i - y_i)^2}
 $$
 
-### 5.4 Lecture mathematique
+### 6.4 Lecture mathématique
 
-- IoU: rapport intersection/union.
-- Distance: norme euclidienne de l'ecart entre deux vecteurs.
+- L'IoU est un rapport d'aires normalisé entre 0 et 1.
+- La distance euclidienne quantifie un écart géométrique dans l'espace des caractéristiques.
 
-### 5.5 Lecture textuelle
+### 6.5 Lecture opérationnelle
 
-- Plus la superposition est bonne, plus IoU monte vers 1.
-- Plus deux objets se ressemblent dans l'espace de features, plus la distance baisse.
+- IoU élevé : bonne localisation.
+- Distance faible : forte similarité de représentation.
 
-### 5.6 Sens de la formule
+### 6.6 Sens métier
 
-- IoU valide la geometrie de detection.
-- La distance valide la similarite de description visuelle.
+- L'IoU répond à « la détection est-elle bien placée ? »
+- La distance répond à « les deux objets sont-ils visuellement proches ? »
 
-### 5.7 Decomposition mathematique pas a pas
-
-$$
-\text{Etape 1: } A_{inter} = |B_p \cap B_{gt}|
-$$
+### 6.7 Décomposition pas à pas de l'IoU
 
 $$
-\text{Etape 2: } A_{union} = |B_p| + |B_{gt}| - A_{inter}
+\text{Étape 1 : } A_{inter} = |B_p \cap B_{gt}|
 $$
 
 $$
-\text{Etape 3: } IoU = \frac{A_{inter}}{A_{union}}
+\text{Étape 2 : } A_{union} = |B_p| + |B_{gt}| - A_{inter}
 $$
 
-### 5.8 Exemple numerique guide
+$$
+\text{Étape 3 : } IoU = \frac{A_{inter}}{A_{union}}
+$$
 
-Avec $|B_p|=1200$, $|B_{gt}|=1000$, $A_{inter}=800$:
+### 6.8 Exemple numérique
+
+Avec $|B_p|=1200$, $|B_{gt}|=1000$, $A_{inter}=800$ :
 
 $$
 A_{union}=1200+1000-800=1400
@@ -165,35 +176,79 @@ $$
 IoU=\frac{800}{1400}\approx0.571
 $$
 
-### 5.9 Resultat attendu et interpretation
+### 6.9 Interprétation du résultat
 
-- $IoU \approx 0.57$: acceptable selon contexte, insuffisant pour controle strict.
-- Exemple regle metier: passage si $IoU \ge 0.7$.
+- $IoU \approx 0.57$ : acceptable dans un scénario souple.
+- En contrôle strict, un seuil de $0.7$ peut être imposé.
 
-### 5.10 Schema visuel IoU
+### 6.10 Schéma visuel de l'IoU
 
 ```mermaid
 flowchart TB
-    A[Boite predite Bp] --> C[Intersection]
-    B[Boite verite terrain Bgt] --> C
+    A[Boîte prédite Bp] --> C[Intersection]
+    B[Boîte référence Bgt] --> C
     A --> D[Union]
     B --> D
     C --> E[IoU = intersection / union]
     D --> E
 ```
 
-## 6. Exemple Python complet (code commente)
+## 7. HOG et SIFT
 
-Le script complet est dans `labs/jour1/day1_lab.py`.
+### 7.1 HOG
+
+HOG (Histogram of Oriented Gradients) résume globalement la structure de contours d'une fenêtre image.
+
+Points importants :
+
+- sensible à la géométrie globale,
+- robuste pour des formes contrastées,
+- souvent utilisé en baseline classique.
+
+### 7.2 SIFT
+
+SIFT extrait des points clés locaux et un descripteur autour de chaque point.
+
+Points importants :
+
+- robuste aux changements d'échelle et de rotation,
+- adapté au matching local,
+- utile en reconnaissance d'objets et appariement d'images.
+
+### 7.3 Comparaison visuelle HOG vs SIFT
+
+```mermaid
+flowchart LR
+    A[Image] --> B[HOG]
+    A --> C[SIFT]
+    B --> B1[Descripteur global\ncontours et structure]
+    C --> C1[Points clés locaux\nmatching robuste]
+    B1 --> D[Usage : baseline classification]
+    C1 --> E[Usage : similarité locale]
+```
+
+```mermaid
+flowchart TB
+    A[Scène proche\nrectangle décalé] --> B[Distance HOG plus faible]
+    C[Scène différente\nrectangle vs cercle] --> D[Distance HOG plus élevée]
+    E[Scène proche] --> F[Plus de bons matches SIFT]
+    G[Scène différente] --> H[Moins de bons matches SIFT]
+```
+
+## 8. Exemple Python complet
+
+Le script principal est `labs/jour1/day1_lab.py`.
 
 ```python
-# Lancer:
+# Exécution
 # python3 labs/jour1/day1_lab.py
 
 import json
 from pathlib import Path
+
 import cv2
 import numpy as np
+
 
 def make_synthetic_scene(shape: str, shift: int = 0) -> np.ndarray:
     img = np.zeros((256, 256, 3), dtype=np.uint8)
@@ -204,6 +259,7 @@ def make_synthetic_scene(shape: str, shift: int = 0) -> np.ndarray:
     else:
         raise ValueError("shape must be 'rectangle' or 'circle'")
     return img
+
 
 def iou(box_a, box_b):
     x_left = max(box_a[0], box_b[0])
@@ -217,11 +273,13 @@ def iou(box_a, box_b):
     area_b = (box_b[2] - box_b[0]) * (box_b[3] - box_b[1])
     return inter / (area_a + area_b - inter)
 
+
 def bbox_from_threshold(gray):
     _, th = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
     points = cv2.findNonZero(th)
     x, y, w, h = cv2.boundingRect(points)
     return (x, y, x + w, y + h)
+
 
 img_gt = make_synthetic_scene("rectangle", 0)
 img_pred = make_synthetic_scene("rectangle", 12)
@@ -238,20 +296,20 @@ Path("outputs/jour1/metrics_minimal.json").write_text(json.dumps(metrics, indent
 print(json.dumps(metrics, indent=2))
 ```
 
-## 7. Explication detaillee du code
+## 9. Explication détaillée du code
 
-- Le script fabrique des scenes synthetiques controlees.
-- Le seuillage extrait automatiquement une boite englobante.
-- Le calcul IoU donne une mesure objective de localisation.
-- La sauvegarde JSON impose une trace reproductible des resultats.
+- `make_synthetic_scene` génère des scènes contrôlées pour tester la robustesse.
+- `bbox_from_threshold` transforme une segmentation binaire en boîte englobante.
+- `iou` mesure la qualité de localisation de manière normalisée.
+- Le fichier JSON assure une traçabilité systématique des mesures.
 
-## 8. Lab pas a pas (tres guide)
+## 10. Travaux pratiques guidés
 
-### 8.1 Objectif du lab
+### 10.1 Objectif
 
-Passer de la theorie a un pipeline mesurable, puis comparer les resultats entre scenes proches et differentes.
+Construire, exécuter et analyser un pipeline mesurable sur des scènes proches et différentes.
 
-### 8.2 Setup environnement
+### 10.2 Installation
 
 ```bash
 python3 -m venv .venv
@@ -260,106 +318,87 @@ pip install -U pip
 pip install opencv-python numpy matplotlib
 ```
 
-Si `venv`/`pip` manque sur Debian minimal:
+Si nécessaire sur Debian minimal :
 
 ```bash
 sudo apt install python3-venv python3-pip
 ```
 
-### 8.3 Etapes d'execution
+### 10.3 Exécution
 
-1. Verifier `labs/jour1/day1_lab.py`.
-2. Executer `python3 labs/jour1/day1_lab.py`.
-3. Verifier `outputs/jour1/metrics.json`.
-4. Verifier `outputs/jour1/figures/jour1_overview.png`.
-5. Interpretrer les metriques.
+1. Vérifier la présence de `labs/jour1/day1_lab.py`.
+2. Exécuter `python3 labs/jour1/day1_lab.py`.
+3. Vérifier `outputs/jour1/metrics.json`.
+4. Vérifier `outputs/jour1/figures/jour1_overview.png`.
+5. Interpréter les métriques.
 
-Sortie attendue (ordre de grandeur):
+### 10.4 Sortie attendue
 
-- `iou_score`: valeur dans $(0,1]$.
-- `hog_dimension`: strictement positive et stable.
-- `hog_different_l2` > `hog_shifted_l2` dans la majorite des cas.
-- `sift_good_matches_similar` > `sift_good_matches_different` dans la majorite des cas.
+- `iou_score` : valeur dans $(0,1]$.
+- `hog_dimension` : valeur positive et stable.
+- `hog_different_l2` > `hog_shifted_l2` dans la majorité des essais.
+- `sift_good_matches_similar` > `sift_good_matches_different` dans la majorité des essais.
 
-### 8.4 Verification (checkpoints)
+### 10.5 Checkpoints
 
-- A: `iou_score` dans l'intervalle attendu.
-- B: distance HOG plus grande pour scene differente.
-- C: matching SIFT meilleur pour scene similaire.
+- A : cohérence de la localisation (IoU valide).
+- B : séparation attendue sur HOG.
+- C : séparation attendue sur SIFT.
 
-### 8.4.bis Sortie attendue
+### 10.6 Erreurs fréquentes
 
-- Les valeurs exactes peuvent varier, mais les relations A>B/C doivent rester cohérentes.
-- Les artefacts doivent toujours etre generes.
+- `ModuleNotFoundError: cv2` : installer `opencv-python`.
+- `No module named pip/venv` : installer `python3-pip` et `python3-venv`.
+- Résultats instables : vérifier les paramètres de génération et l'absence de modifications parasites.
 
-### 8.5 Erreurs frequentes et correction
-
-- `ModuleNotFoundError: cv2` -> installer `opencv-python`.
-- `No module named pip/venv` -> installer paquets systeme `python3-pip`, `python3-venv`.
-- Resultats incoherents -> verifier que le code n'a pas ete modifie entre extraction et evaluation.
-
-### 8.6 Validation technique du code
-
-- Syntaxe: `python3 -m py_compile labs/jour1/day1_lab.py`
-- Execution: `python3 labs/jour1/day1_lab.py`
-
-Commande rapide:
+### 10.7 Validation technique
 
 ```bash
 python3 -m py_compile labs/jour1/day1_lab.py && python3 labs/jour1/day1_lab.py
 ```
 
-Diagnostic rapide:
+Diagnostic rapide :
 
-- IoU faible: revoir boites/seuillage/decalage.
-- Distances HOG trop proches: augmenter contraste entre scenes.
-- Trop de faux matches SIFT: diminuer le ratio test.
+- IoU faible : vérifier seuillage, boîtes et décalage.
+- Distances HOG trop proches : augmenter l'écart visuel entre scènes.
+- Matching SIFT trop permissif : réduire le ratio test.
 
-### 8.7 Labs progressifs (3 niveaux)
+### 10.8 Parcours progressif recommandé
 
-Lab 1 (base): executer tel quel et commenter les metriques.
+- Niveau 1 : exécution standard et lecture des métriques.
+- Niveau 2 : variation de `shift` et étude de l'impact sur l'IoU.
+- Niveau 3 : ajout de bruit/luminosité et analyse de robustesse HOG/SIFT.
 
-Lab 2 (parametres):
+## 11. Points clés à retenir
 
-- varier `shift` (6, 12, 24, 36),
-- tracer l'evolution de `iou_score`.
+- Une tâche bien définie est la condition d'un pipeline fiable.
+- Les métriques (IoU, distances) structurent l'analyse et la décision.
+- HOG et SIFT restent d'excellents outils pédagogiques pour comprendre la vision classique.
+- La reproductibilité est une exigence centrale en contexte professionnel.
 
-Lab 3 (robustesse):
+## 12. Exercices
 
-- ajouter bruit gaussien et variation de luminosite,
-- comparer l'impact sur HOG et SIFT.
+- Expliquer pourquoi l'IoU diminue quand `shift` augmente.
+- Tester un autre seuil binaire et commenter les effets.
+- Comparer ratio test SIFT (`0.60`, `0.75`, `0.90`) sur faux matches et vrais matches.
 
-## 9. Resume et points a retenir
+## 13. Livrables attendus
 
-- Le trio classification/detection/reconnaissance doit etre maitrise avant la suite.
-- Un bon pipeline combine transformation, mesure et interpretation.
-- IoU, HOG, SIFT forment une base solide et interpretable.
-- La qualite d'un cours se juge aussi sur des sorties testables.
+- Script exécuté sans erreur : `labs/jour1/day1_lab.py`.
+- Artefacts : `outputs/jour1/metrics.json`, `outputs/jour1/figures/jour1_overview.png`.
+- Note d'analyse courte (5 à 10 lignes) avec interprétation des mesures.
 
-## 10. Mini exercices
+## 14. Cadre pédagogique étudiant
 
-- Exercice 1: expliquer pourquoi IoU baisse quand `shift` augmente.
-- Exercice 2: tester un seuil binaire different et commenter.
-- Exercice 3: comparer ratio test 0.6/0.75/0.9 sur les faux matches.
+- Chapitre orienté autonomie et progression guidée.
+- Pas de notes formateur ni de corrigé exhaustif intégré.
+- Validation par checkpoints, métriques et livrables.
 
-## 11. Livrables attendus
+## 15. Références
 
-- Script `labs/jour1/day1_lab.py` execute.
-- `outputs/jour1/metrics.json`.
-- `outputs/jour1/figures/jour1_overview.png`.
-- Mini rapport (5-10 lignes) avec interpretation.
-
-## 12. Cadre version etudiant (obligatoire)
-
-- Chapitre centre apprentissage et autonomie.
-- Pas de notes formateur ni corrige complet cache.
-- Auto-verification via checkpoints et metriques.
-
-## 13. References (sources en ligne)
-
-- [R1] Stanford CS231n Schedule: `https://cs231n.stanford.edu/2024/schedule.html`
-- [R2] CS231n Course Notes: `https://cs231n.github.io/`
-- [R3] OpenCV HOGDescriptor API: `https://docs.opencv.org/4.x/d5/d33/structcv_1_1HOGDescriptor.html`
-- [R4] OpenCV SIFT API: `https://docs.opencv.org/4.x/d7/d60/classcv_1_1SIFT.html`
-- [R5] D. Lowe, SIFT (IJCV 2004): `https://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf`
-- [R6] PASCAL VOC Challenge (IJCV 2010): `https://www.robots.ox.ac.uk/~vgg/projects/pascal/VOC/pubs/everingham10.pdf`
+- [R1] Stanford CS231n Schedule : `https://cs231n.stanford.edu/2024/schedule.html`
+- [R2] CS231n Course Notes : `https://cs231n.github.io/`
+- [R3] OpenCV HOGDescriptor API : `https://docs.opencv.org/4.x/d5/d33/structcv_1_1HOGDescriptor.html`
+- [R4] OpenCV SIFT API : `https://docs.opencv.org/4.x/d7/d60/classcv_1_1SIFT.html`
+- [R5] D. Lowe, SIFT (IJCV 2004) : `https://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf`
+- [R6] PASCAL VOC Challenge (IJCV 2010) : `https://www.robots.ox.ac.uk/~vgg/projects/pascal/VOC/pubs/everingham10.pdf`
