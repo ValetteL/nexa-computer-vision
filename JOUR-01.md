@@ -38,23 +38,17 @@ En pratique, cette rigueur evite de "faire tourner un modele" sans savoir interp
 - Sortie: une seule classe.
 - Question: "Qu'est-ce qu'il y a dans cette image?"
 
-Reference: cours CS231n (vision, classification, detection) [R1][R2].
-
 ### 4.2 Detection
 
 - Entree: image complete.
 - Sortie: une ou plusieurs boites + classes.
 - Question: "Ou sont les objets et quels sont-ils?"
 
-Reference: cours CS231n (object detection) [R1].
-
 ### 4.3 Reconnaissance
 
 - Entree: objet ou region detectee.
 - Sortie: identite fine ou classe detaillee.
 - Question: "Quel objet exact/personne exacte est-ce?"
-
-Reference: cours CS231n (representations visuelles) [R2].
 
 ### 4.4 Coherence metier
 
@@ -113,15 +107,11 @@ $$
 IoU = \frac{|B_p \cap B_{gt}|}{|B_p \cup B_{gt}|}
 $$
 
-Reference: definition Jaccard/IoU [R6].
-
 Distance euclidienne entre descripteurs:
 
 $$
 d(\mathbf{x}, \mathbf{y}) = \sqrt{\sum_{i=1}^{n}(x_i - y_i)^2}
 $$
-
-Reference: usage standard en matching de descripteurs locaux [R4].
 
 ### 5.4 Lecture mathematique
 
@@ -190,9 +180,9 @@ Le script complet, commente et structure, est dans `labs/jour1/day1_lab.py`.
 
 Choix techniques relies aux references:
 
-- HOG avec fenetre/blocs/cellules et `nbins` conformes au fonctionnement OpenCV [R3].
-- SIFT via `cv2.SIFT_create()` et `detectAndCompute` selon la doc OpenCV [R4].
-- Matching local via test de ratio de Lowe [R5].
+- HOG avec fenetre/blocs/cellules et `nbins` conformes au fonctionnement OpenCV.
+- SIFT via `cv2.SIFT_create()` et `detectAndCompute` selon la documentation officielle.
+- Matching local via test de ratio de Lowe.
 
 ```python
 # Lancer ce script:
