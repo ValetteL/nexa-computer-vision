@@ -62,6 +62,29 @@ Reference: cours CS231n (representations visuelles) [R2].
 - En retail: detection de produit + reconnaissance de reference.
 - En securite: detection d'un visage + reconnaissance d'identite.
 
+### 4.5 Mini cas concrets (terrain)
+
+#### Cas 1 - Controle qualite (industrie)
+
+- Situation: une camera verifie la presence d'un joint sur une piece.
+- Besoin: detecter la zone du joint et mesurer la qualite de localisation.
+- Indicateur: IoU entre boite predite et boite attendue.
+- Regle simple: si $IoU \ge 0.7$, la piece passe; sinon controle manuel.
+
+#### Cas 2 - Retail (rayon magasin)
+
+- Situation: compter les produits visibles sur une etagere.
+- Besoin: detection des boites puis reconnaissance de reference produit.
+- Indicateur: nombre de detections correctes + cohérence de classe.
+- Limite pratique: objets partiellement caches, eclairage variable.
+
+#### Cas 3 - Surveillance routiere
+
+- Situation: detecter vehicules et pietons en flux video.
+- Besoin: detection rapide et robuste, meme avec mouvement.
+- Indicateur: compromis precision/rappel selon seuil de confiance.
+- Contrainte: latence faible pour decisions en temps reel.
+
 ## 5. Formulation mathematique (quand necessaire)
 
 ### 5.1 Contexte mathematique
@@ -149,6 +172,11 @@ $$
 $$
 IoU = \frac{800}{1400} \approx 0.571
 $$
+
+Application metier rapide:
+
+- Si le seuil qualite est $0.5$, ce resultat est acceptable.
+- Si le seuil qualite est $0.7$, ce resultat est insuffisant et doit etre ameliore.
 
 ### 5.9 Resultat attendu et interpretation
 
