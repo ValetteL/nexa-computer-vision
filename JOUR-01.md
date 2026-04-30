@@ -76,6 +76,26 @@ flowchart LR
 - Retail: detecter et reconnaitre des produits -> precision/rappel + erreurs de confusion.
 - Route: detecter pietons/vehicules -> compromis precision/rappel en temps reel.
 
+### 4.7 Schema visuel HOG vs SIFT
+
+```mermaid
+flowchart LR
+    A[Image] --> B[HOG]
+    A --> C[SIFT]
+    B --> B1[Descripteur global\nstructure/contours]
+    C --> C1[Points cles locaux\nmatching robuste]
+    B1 --> D[Usage: baseline classification]
+    C1 --> E[Usage: similarite/reconnaissance locale]
+```
+
+```mermaid
+flowchart TB
+    A[Scene proche\nrectangle decale] --> B[Distance HOG faible]
+    C[Scene differente\nrectangle vs cercle] --> D[Distance HOG plus elevee]
+    E[Scene proche] --> F[Plus de bons matches SIFT]
+    G[Scene differente] --> H[Moins de bons matches SIFT]
+```
+
 ## 5. Formulation mathematique (quand necessaire)
 
 ### 5.1 Contexte mathematique
