@@ -235,9 +235,10 @@ flowchart TB
     G[Scène différente] --> H[Moins de bons matches SIFT]
 ```
 
-## 8. Exemple Python complet
+## 8. Exemple Python minimal
 
-Le script principal est `labs/jour1/day1_lab.py`.
+Cet exemple est volontairement minimal et se concentre sur le calcul de l'IoU.
+Le script principal complet du chapitre reste `labs/jour1/day1_lab.py`.
 
 ```python
 # Exécution
@@ -301,7 +302,8 @@ print(json.dumps(metrics, indent=2))
 - `make_synthetic_scene` génère des scènes contrôlées pour tester la robustesse.
 - `bbox_from_threshold` transforme une segmentation binaire en boîte englobante.
 - `iou` mesure la qualité de localisation de manière normalisée.
-- Le fichier JSON assure une traçabilité systématique des mesures.
+- Le fichier `metrics_minimal.json` assure une traçabilité systématique des mesures.
+- Pour les métriques HOG/SIFT et les figures, utiliser `labs/jour1/day1_lab.py`.
 
 ## 10. Travaux pratiques guidés
 
