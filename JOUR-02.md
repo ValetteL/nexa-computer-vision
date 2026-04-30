@@ -1,6 +1,6 @@
 # Jour 2 - CNN et Faster R-CNN
 
-Ce chapitre sera redige avec le gabarit standard Codex.
+Ce chapitre sera redige avec le gabarit standard.
 
 ## Rappel de structure obligatoire
 
