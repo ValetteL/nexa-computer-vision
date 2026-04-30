@@ -1,6 +1,6 @@
 # Jour 3 - YOLOv3 et optimisation
 
-Ce chapitre sera redige avec le gabarit standard Codex.
+Ce chapitre sera redige avec le gabarit standard.
 
 ## Rappel de structure obligatoire
 
