@@ -334,7 +334,7 @@ Lien direct avec le syllabus:
 
 ### 8.1 Objectif du lab
 
-Executer un mini pipeline vision de bout en bout et interpretrer les mesures de qualite.
+Executer un mini pipeline vision de bout en bout et interpreter les mesures de qualite.
 
 ### 8.2 Setup environnement
 
@@ -364,6 +364,12 @@ sudo apt install python3-venv python3-pip
 - Checkpoint A: `iou_score` est strictement superieur a 0 et inferieur ou egal a 1.
 - Checkpoint B: `hog_different_l2` est superieur a `hog_shifted_l2`.
 - Checkpoint C: `sift_good_matches_similar` est superieur a `sift_good_matches_different`.
+
+Lecture rapide des checkpoints:
+
+- Si A echoue, la localisation est probablement mal calculee (boites/seuillage).
+- Si B echoue, la scene "differente" n'est pas assez differenciante ou HOG est mal configure.
+- Si C echoue, revoir les descripteurs SIFT et le ratio test.
 
 ### 8.5 Erreurs frequentes et correction
 
@@ -410,4 +416,4 @@ sudo apt install python3-venv python3-pip
 - [R3] OpenCV HOGDescriptor API: `https://docs.opencv.org/4.x/d5/d33/structcv_1_1HOGDescriptor.html`
 - [R4] OpenCV SIFT API: `https://docs.opencv.org/4.x/d7/d60/classcv_1_1SIFT.html`
 - [R5] D. Lowe, SIFT paper (IJCV 2004): `https://www.cs.ubc.ca/~lowe/papers/ijcv04.pdf`
-- [R6] Jaccard/IoU definition (set overlap): `https://en.wikipedia.org/wiki/Jaccard_index`
+- [R6] The PASCAL Visual Object Classes (VOC) Challenge (IJCV 2010): `https://www.robots.ox.ac.uk/~vgg/projects/pascal/VOC/pubs/everingham10.pdf`
