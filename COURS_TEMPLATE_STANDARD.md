@@ -1,30 +1,39 @@
-# Gabarit Standard de Cours
+# Gabarit Standard de Cours (format hybride)
 
-Ce fichier definit le format obligatoire pour rediger tout chapitre de cours.
+Ce fichier définit le format obligatoire pour rédiger tout chapitre de cours.
 
-## Regles globales obligatoires
+## Règles globales obligatoires
 
-- Produire une version etudiant uniquement (pas de section "notes formateur", pas de corrige complet dans le corps du cours).
-- Toujours rediger en francais clair, pedagogique, et progressif.
+- Produire une version étudiant uniquement (pas de section "notes formateur", pas de corrigé complet dans le corps du cours).
+- Toujours rédiger en français clair, pédagogique, et progressif. Adopter un ton narratif et intuitif, pas purement académique.
 - Toujours commencer par une introduction qui explique pourquoi le chapitre est important.
-- Toujours guider pas a pas, sans sauts logiques.
-- Toujours garder une coherence pedagogique forte: objectif -> concept -> maths -> code -> lab -> verification.
-- Toujours inclure un exemple Python complet et executable.
+- Toujours guider pas à pas, sans sauts logiques.
+- Toujours garder une cohérence pédagogique forte : objectif -> concept -> maths -> code -> lab -> vérification.
+- Toujours inclure un exemple Python complet et exécutable. Le code peut être divisé en plusieurs blocs, chacun correspondant à un concept précis.
 - Toujours commenter le code et expliquer le code en dessous du bloc.
-- Toujours fournir un lab avec etapes detaillees, commandes, et points de verification.
-- Toujours tester tout le code avant integration: le code fourni dans le cours doit s'executer et fonctionner.
-- Toujours citer les sources utilisees et ajouter une section finale "References" avec URLs.
-- Toujours placer les references uniquement en fin de chapitre (section "References"), pas de citations dispersees dans le corps.
-- Pour chaque lab, inclure une sortie attendue (ordre de grandeur) et une interpretation rapide des metriques produites.
-- Toujours soigner le francais: accents, ponctuation, orthographe et grammaire doivent etre corrects dans tout le cours.
-- Interdiction stricte de toute reference a un bot/IA/assistant/outillage de generation dans le repo, les cours, les commentaires, les commits et les descriptions GitHub.
-- Les commits et pushes doivent etre neutres et attribues uniquement a l'auteur du repo, sans signature ou mention d'un bot/IA.
-- Toute nouvelle regle doit etre ajoutee d'abord au gabarit, puis appliquee au chapitre.
-- Corriger le gabarit et les chapitres au fur et a mesure, sans attendre la fin du module.
+- Toujours fournir un lab avec étapes détaillées, commandes, et points de vérification.
+- Toujours tester tout le code avant intégration : le code fourni dans le cours doit s'exécuter et fonctionner.
+- Toujours citer les sources utilisées et ajouter une section finale "Références" avec URLs.
+- Toujours placer les références uniquement en fin de chapitre (section "Références"), pas de citations dispersées dans le corps.
+- Pour chaque lab, inclure une sortie attendue (ordre de grandeur) et une interprétation rapide des métriques produites.
+- Toujours soigner le français : accents, ponctuation, orthographe et grammaire doivent être corrects dans tout le cours.
+- Interdiction stricte de toute mention d'outil externe de production automatique dans le repo, les cours, les commentaires, les commits et les descriptions GitHub.
+- Les commits et pushes doivent être neutres et attribués uniquement à l'auteur du repo, sans signature ou mention d'intervenant secondaire.
+- Toute nouvelle règle doit être ajoutée d'abord au gabarit, puis appliquée au chapitre.
+- Corriger le gabarit et les chapitres au fur et à mesure, sans attendre la fin du module.
+- Toujours aligner le contenu sur le syllabus officiel de l'école. Chaque point du programme doit être couvert explicitement.
+- Toujours fournir les fichiers de reproductibilité projet quand du code est livré : `requirements.txt` pour l'environnement Python et `.gitignore` pour exclure environnement virtuel, caches, jetons et artefacts volumineux.
 
-## Regle mathematique obligatoire
+## Style visuel et schéma
 
-Quand une notion mathematique est impliquee, les formules doivent etre ecrites imperativement en format math LaTeX Markdown:
+- Utiliser des diagrammes Mermaid pour les schémas conceptuels et les pipelines.
+- Utiliser des diagrammes ASCII pour les représentations techniques détaillées (axes, grilles, valeurs).
+- Les tableaux comparatifs sont encouragés pour opposer des méthodes ou concepts.
+- Chaque schéma doit être accompagné d'une courte explication de lecture.
+
+## Règle mathématique obligatoire
+
+Quand une notion mathématique est impliquée, les formules doivent être écrites impérativement en format math LaTeX Markdown :
 
 - Inline: `$a^2 + b^2 = c^2$`
 - Bloc:
@@ -35,19 +44,19 @@ L = \frac{1}{N}\sum_{i=1}^{N}(y_i - \hat{y}_i)^2
 $$
 ```
 
-Interdiction d'ecrire les formules importantes en texte brut seulement.
+Interdiction d'écrire les formules importantes en texte brut seulement.
 
-Ordre obligatoire de presentation mathematique (quand il y a des formules):
+Ordre obligatoire de présentation mathématique (quand il y a des formules) :
 
-1. Contexte mathematique
+1. Contexte mathématique
 2. Symboles et notations
 3. Formule en format math
-4. Lecture mathematique
+4. Lecture mathématique
 5. Lecture textuelle
 6. Sens de la formule
-7. Decomposition pas a pas
-8. Calcul numerique guide
-9. Resultat attendu
+7. Décomposition pas à pas
+8. Calcul numérique guidé
+9. Résultat attendu
 
 ## Structure standard obligatoire par chapitre
 
@@ -59,75 +68,81 @@ Copier-coller cette structure pour chaque fichier `JOUR-XX.md` ou `CHAPITRE-XX.m
 
 ## 1. Objectif du chapitre
 
-- Competences visees
-- Resultat concret attendu en fin de chapitre
+- Rappeler les blocs du syllabus officiel couverts par ce chapitre.
+- Compétences visées.
+- Résultat concret attendu en fin de chapitre.
 
 ## 2. Introduction (importance du chapitre)
 
-- Contexte metier
-- Problemes resolus par ce chapitre
-- Lien avec le reste du cours
+- Contexte métier : pourquoi ce sujet compte dans la pratique.
+- Problèmes résolus par ce chapitre.
+- Lien avec le reste du cours et les chapitres suivants.
+- Poser 2-3 questions auxquelles le chapitre va répondre.
 
-## 3. Prerequis
+## 3. Prérequis
 
-- Connaissances necessaires
-- Outils logiciels necessaires
+- Connaissances nécessaires.
+- Outils logiciels nécessaires avec commandes d'installation.
 
-## 4. Concepts cles
+## 4. Concepts clés
 
-- Definitions simples
-- Intuition
-- Cas d'usage
+- Définitions simples et intuitives de chaque notion.
+- Intuition avant la technique.
+- Cas d'usage concrets et réalistes.
+- Diagrammes Mermaid et/ou ASCII pour illustrer les relations entre concepts.
 
-## 5. Formulation mathematique (quand necessaire)
+## 5. Contenu technique du syllabus
 
-### 5.1 Contexte mathematique
+- Couvrir chaque point du syllabus officiel dans l'ordre.
+- Pour chaque notion : explication narrative + schéma + exemple code minimal.
+- Garder un ton progressif : du plus simple au plus complexe.
 
-- Quand et pourquoi cette formule est utilisee
-- Type de probleme resolu
+## 6. Formulation mathématique (quand nécessaire)
 
-### 5.2 Symboles et notations
+### 6.1 Contexte mathématique
 
-- $x$: [definition]
-- $y$: [definition]
-- $\hat{y}$: [definition]
-- $N$: [definition]
+- Quand et pourquoi cette formule est utilisée.
+- Type de problème résolu.
 
-### 5.3 Formule(s) en format math
+### 6.2 Symboles et notations
 
-Ecrire la ou les formules en LaTeX Markdown (obligatoire):
+- $x$ : [définition]
+- $y$ : [définition]
+
+### 6.3 Formule(s) en format math
+
+Écrire la ou les formules en LaTeX Markdown (obligatoire) :
 
 $$
 [FORMULE_PRINCIPALE]
 $$
 
-### 5.4 Lecture mathematique
+### 6.4 Lecture mathématique
 
-- Lire la formule avec ses notations mathematiques
-- Exemple de style: "q_phi de z sachant x,y suit une loi normale parametree par mu et sigma carre"
+- Lire la formule avec ses notations mathématiques.
 
-### 5.5 Lecture textuelle
+### 6.5 Lecture textuelle
 
-- Reformuler en langage naturel clair, orientee intuition/metier
+- Reformuler en langage naturel clair, orienté intuition/métier.
 
-### 5.6 Sens de la formule
+### 6.6 Sens de la formule
 
-- Expliquer ce que chaque terme force le modele a apprendre
-- Donner l'effet attendu sur le comportement du modele
+- Expliquer ce que chaque terme implique.
+- Donner l'effet attendu.
 
-### 5.7 Decomposition mathematique pas a pas
+### 6.7 Décomposition mathématique pas à pas
 
 Montrer les etapes de calcul dans l'ordre logique:
 
 $$
-\text{Etape 1: ...}
+\text{Étape 1 : ...}
 $$
 
 $$
-\text{Etape 2: ...}
+\text{Étape 2 : ...}
 $$
 
-### 5.8 Exemple numerique guide
+### 6.8 Exemple numérique guidé
 
 Donner des valeurs concretes et calculer:
 
@@ -135,35 +150,37 @@ $$
 [CALCUL_NUMERIQUE]
 $$
 
-### 5.9 Resultat attendu et interpretation
+### 6.9 Résultat attendu et interprétation
 
-- Valeur obtenue
-- Signification metier/technique
-- Comment juger si le resultat est bon
+- Valeur obtenue.
+- Signification métier/technique.
+- Comment juger si le resultat est bon.
 
-## 6. Exemple Python complet (code commente)
+## 7. Exemples Python par concept
+
+- Presenter le code en plusieurs blocs, chacun correspondant a un concept.
+- Chaque bloc est suivi de son explication detaillee.
 
 ```python
-# 1) Imports
-# 2) Chargement/preparation des donnees
-# 3) Calcul/modelisation
-# 4) Affichage des resultats
+# Bloc 1 : notion A
+# Bloc 2 : notion B
 ```
 
-## 7. Explication detaillee du code
+**Explication**
+- Bloc 1 : ce que fait le code et pourquoi.
+- Bloc 2 : ce que fait le code et pourquoi.
 
-- Bloc 1: ce que fait l'import
-- Bloc 2: ce que fait la preparation des donnees
-- Bloc 3: ce que fait l'algorithme
-- Bloc 4: comment lire la sortie
-
-## 8. Lab pas a pas (tres guide)
+## 8. Lab pas à pas (très guidé)
 
 ### 8.1 Objectif du lab
 
-- Ce que l'etudiant doit obtenir a la fin
+- Ce que l'étudiant doit obtenir à la fin.
 
-### 8.2 Setup environnement
+### 8.2 Arborescence
+
+- Presenter la structure des fichiers attendue.
+
+### 8.3 Setup environnement
 
 ```bash
 python3 -m venv .venv
@@ -172,84 +189,97 @@ pip install -U pip
 pip install [DEPENDANCES]
 ```
 
-### 8.3 Etapes d'execution
+### 8.4 Étapes d'exécution
 
-1. Creer l'arborescence demandee
-2. Ajouter les fichiers requis
-3. Lancer la commande 1
-4. Verifier la sortie attendue 1
-5. Lancer la commande 2
-6. Verifier la sortie attendue 2
+1. Creer l'arborescence demandee.
+2. Ajouter les fichiers requis.
+3. Lancer la commande 1.
+4. Verifier la sortie attendue 1.
+5. Lancer la commande 2.
+6. Verifier la sortie attendue 2.
 
-### 8.4 Verification (checkpoints)
+### 8.5 Verification (checkpoints)
 
-- Checkpoint A: [attendu]
-- Checkpoint B: [attendu]
-- Checkpoint C: [attendu]
+- Checkpoint A : [attendu].
+- Checkpoint B : [attendu].
+- Checkpoint C : [attendu].
 
-### 8.4.bis Sortie attendue
+### 8.6 Sortie attendue
 
-- Donner des ordres de grandeur plausibles pour les metriques.
-- Preciser les relations attendues entre metriques (ex: A > B).
+- Donner un exemple JSON ou texte de sortie.
+- Donner des ordres de grandeur plausibles pour les métriques.
+- Préciser les relations attendues entre métriques (ex. : A > B).
+- Interpreter rapidement les resultats.
 
-### 8.5 Erreurs frequentes et correction
+### 8.7 Erreurs frequentes et correction
 
-- Erreur 1 -> Cause -> Correction
-- Erreur 2 -> Cause -> Correction
+- Erreur 1 -> Cause -> Correction.
+- Erreur 2 -> Cause -> Correction.
 
-### 8.6 Validation technique du code
+### 8.8 Validation technique du code
 
-- Fournir une commande de verification rapide (syntaxe + execution).
-- Ajouter une lecture rapide des metriques pour aider le diagnostic.
+- Fournir une commande de vérification rapide (syntaxe + exécution).
+- Ajouter une lecture rapide des métriques pour aider le diagnostic.
+
+### 8.9 Parcours progressif recommande
+
+- Niveau 1 : exécution standard.
+- Niveau 2 : variation d'un parametre.
+- Niveau 3 : analyse de robustesse.
 
 ## 9. Resume et points a retenir
 
-- 3 a 7 points essentiels
+- 3 à 7 points essentiels.
 
 ## 10. Mini exercices
 
-- Exercice 1 (application directe)
-- Exercice 2 (variation)
-- Exercice 3 (analyse de resultat)
+- Exercice 1 (application directe).
+- Exercice 2 (variation).
+- Exercice 3 (analyse de resultat).
 
 ## 11. Livrables attendus
 
-- Fichier(s) code
-- Captures/sorties
-- Reponse courte d'interpretation
+- Fichier(s) code.
+- Captures/sorties.
+- Réponse courte d'interprétation.
 
-## 11.bis References (obligatoire)
+## 12. Cadre version étudiant (obligatoire)
 
-- Lister les sources exactes utilisees dans le chapitre (cours universitaires, documentation officielle, papiers).
-- Ne pas ajouter de references inline dans les sections du cours; conserver les sources regroupees en fin de chapitre.
-- Fournir des URLs verifiables.
-
-## 12. Cadre version etudiant (obligatoire)
-
-- Contenu oriente apprentissage et autonomie de l'etudiant.
-- Pas de meta-instructions formateur (timing enseignant, script oral, posture de classe).
-- Pas de correction exhaustive integree directement; privilegier indices, checkpoints et auto-verification.
+- Contenu orienté apprentissage et autonomie de l'étudiant.
+- Pas de méta-instructions formateur (timing enseignant, script oral, posture de classe).
+- Pas de correction exhaustive intégrée directement ; privilégier indices, checkpoints et auto-vérification.
 - Conserver des consignes actionnables et des attentes mesurables.
+
+## 13. Références (obligatoire)
+
+- Lister les sources exactes utilisées dans le chapitre (cours universitaires, documentation officielle, papiers).
+- Ne pas ajouter de références inline dans les sections du cours ; conserver les sources regroupées en fin de chapitre.
+- Fournir des URLs verifiables.
 
 ---
 
 ## Checkliste qualite avant validation
 
-- Introduction presente
-- Formules en format math LaTeX quand necessaire
-- Signification de tous les symboles mathematiques
-- Lecture mathematique presente
-- Lecture textuelle presente
-- Sens de la formule explicite
-- Calcul guide avec resultat attendu
-- Exemple Python complet et commente
-- Code execute et valide avant integration
-- Explication detaillee du code sous le bloc
-- Lab executable pas a pas
-- Checkpoints et erreurs frequentes documentes
-- Version etudiant respectee (sans sections formateur)
-- Enchainement pedagogique coherent sur tout le chapitre
-- Sources explicites et tracables (section References en fin de chapitre uniquement)
-- Nouvelles regles integrees d'abord dans le gabarit puis appliquees au chapitre
-- Sortie attendue et interpretation rapide presentes dans la partie lab
-- Francais correct et soigne (accents, ponctuation, orthographe, grammaire)
+- Contenu aligne sur le syllabus officiel (chaque point couvert).
+- Introduction présente et engageante.
+- Définitions et notions clés en début de chapitre.
+- Diagrammes Mermaid et/ou ASCII avec explication de lecture.
+- Formules en format math LaTeX quand nécessaire.
+- Signification de tous les symboles mathématiques.
+- Lecture mathématique présente.
+- Lecture textuelle présente.
+- Sens de la formule explicite.
+- Calcul guidé avec résultat attendu.
+- Exemples Python par concept, complets et commentes.
+- Code exécuté et validé avant intégration.
+- Reproductibilite technique assuree (`requirements.txt`, commandes d'installation, fichiers sensibles exclus).
+- Explication detaillee du code sous chaque bloc.
+- Lab exécutable pas à pas avec arborescence.
+- Checkpoints et erreurs frequentes documentes.
+- Sortie attendue avec exemple concret et interprétation.
+- Parcours progressif recommande (3 niveaux).
+- Version étudiant respectée (sans sections formateur).
+- Enchaînement pédagogique cohérent sur tout le chapitre.
+- Sources explicites et traçables (section Références en fin de chapitre uniquement).
+- Nouvelles règles intégrées d'abord dans le gabarit puis appliquées au chapitre.
+- Francais correct et soigne (accents, ponctuation, orthographe, grammaire).

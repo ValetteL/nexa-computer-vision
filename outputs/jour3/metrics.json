@@ -1,0 +1,58 @@
+{
+  "speed": {
+    "faster_rcnn_mean_s": 3.5352,
+    "yolov8n_mean_s": 0.114,
+    "speedup_yolo_vs_frcnn": 31.02
+  },
+  "image_source": "real_coco_dog",
+  "gt_boxes": [
+    [
+      50,
+      35,
+      645,
+      555
+    ]
+  ],
+  "iou": {
+    "faster_rcnn_avg": 0.982,
+    "yolov8n_avg": 0.9678,
+    "faster_rcnn_per_gt": [
+      0.982
+    ],
+    "yolov8n_per_gt": [
+      0.9678
+    ]
+  },
+  "num_detections": {
+    "faster_rcnn": 1,
+    "yolov8n": 1
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.1,
+      "num_detections": 1,
+      "avg_iou": 0.9678
+    },
+    {
+      "threshold": 0.25,
+      "num_detections": 1,
+      "avg_iou": 0.9678
+    },
+    {
+      "threshold": 0.5,
+      "num_detections": 1,
+      "avg_iou": 0.9678
+    },
+    {
+      "threshold": 0.75,
+      "num_detections": 0,
+      "avg_iou": 0.0
+    }
+  ],
+  "figures": {
+    "speed_comparison": "outputs/jour3/figures/speed_comparison.png",
+    "iou_comparison": "outputs/jour3/figures/iou_comparison.png",
+    "detection_overlay": "outputs/jour3/figures/detection_overlay.png",
+    "threshold_sweep": "outputs/jour3/figures/threshold_sweep.png"
+  }
+}
