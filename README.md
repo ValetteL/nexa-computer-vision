@@ -1,3 +1,11 @@
+# nexa-computer-vision
+
+Module pédagogique de détection et reconnaissance d'objets — 3 jours, 21 heures.
+
+Ce dépôt contient l'intégralité du cours, des labs Python exécutables, des figures de validation et un projet bonus de reconnaissance faciale. Chaque jour alterne concepts, mathématiques appliquées, code OpenCV/PyTorch et un lab complet avec métriques et visualisations.
+
+---
+
 # Syllabus
 
 ## Mastère 1
