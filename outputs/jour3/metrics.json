@@ -1,8 +1,8 @@
 {
   "speed": {
-    "faster_rcnn_mean_s": 6.406,
-    "yolov8n_mean_s": 0.1207,
-    "speedup_yolo_vs_frcnn": 53.08
+    "faster_rcnn_mean_s": 3.4796,
+    "yolov8n_mean_s": 0.1154,
+    "speedup_yolo_vs_frcnn": 30.16
   },
   "image_source": "real_coco_dog",
   "gt_boxes": [
