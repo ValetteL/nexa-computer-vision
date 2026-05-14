@@ -1,0 +1,68 @@
+{
+  "speed": {
+    "faster_rcnn_mean_s": 6.406,
+    "yolov8n_mean_s": 0.1207,
+    "speedup_yolo_vs_frcnn": 53.08
+  },
+  "image_source": "real_coco_dog",
+  "gt_boxes": [
+    [
+      50,
+      35,
+      645,
+      555
+    ]
+  ],
+  "iou": {
+    "faster_rcnn_avg": 0.982,
+    "yolov8n_avg": 0.9678,
+    "faster_rcnn_per_gt": [
+      0.982
+    ],
+    "yolov8n_per_gt": [
+      0.9678
+    ]
+  },
+  "num_detections": {
+    "faster_rcnn": 1,
+    "yolov8n": 1
+  },
+  "threshold_sweep": [
+    {
+      "threshold": 0.1,
+      "num_detections": 1,
+      "avg_iou": 0.9678,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "threshold": 0.25,
+      "num_detections": 1,
+      "avg_iou": 0.9678,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "threshold": 0.5,
+      "num_detections": 1,
+      "avg_iou": 0.9678,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "threshold": 0.75,
+      "num_detections": 0,
+      "avg_iou": 0.0,
+      "precision": 0.0,
+      "recall": 0.0
+    }
+  ],
+  "map50_simplified": 1.0,
+  "metric_note": "mAP@0.5 simplifi\u00e9 pour usage p\u00e9dagogique sur une seule classe et quelques seuils, pas une \u00e9valuation COCO officielle.",
+  "figures": {
+    "speed_comparison": "outputs/jour3/figures/speed_comparison.png",
+    "iou_comparison": "outputs/jour3/figures/iou_comparison.png",
+    "detection_overlay": "outputs/jour3/figures/detection_overlay.png",
+    "threshold_sweep": "outputs/jour3/figures/threshold_sweep.png"
+  }
+}

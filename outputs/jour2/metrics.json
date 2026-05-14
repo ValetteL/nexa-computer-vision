@@ -1,0 +1,97 @@
+{
+  "cnn_final_loss": 0.0008,
+  "dataset_split": {
+    "train_samples": 288,
+    "test_samples": 72,
+    "test_ratio": 0.2
+  },
+  "cnn_train_accuracy": 1.0,
+  "cnn_test_accuracy": 1.0,
+  "frcnn_num_detections": 2,
+  "image_source": "real_coco_dog",
+  "gt_boxes": [
+    [
+      50,
+      35,
+      645,
+      555
+    ]
+  ],
+  "frcnn_detections": [
+    {
+      "label": 18,
+      "score": 0.999,
+      "box": [
+        50.5,
+        39.4,
+        647.0,
+        552.1
+      ]
+    },
+    {
+      "label": 19,
+      "score": 0.109,
+      "box": [
+        53.7,
+        23.7,
+        649.5,
+        549.7
+      ]
+    }
+  ],
+  "avg_iou": 0.982,
+  "iou_per_gt": [
+    0.982
+  ],
+  "ap50_simplified": 1.0,
+  "map50_simplified": 1.0,
+  "metric_note": "AP/mAP simplifi\u00e9s pour usage p\u00e9dagogique sur une seule classe et quelques seuils, pas une \u00e9valuation COCO officielle.",
+  "precision_recall": [
+    {
+      "threshold": 0.05,
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.5,
+      "recall": 1.0
+    },
+    {
+      "threshold": 0.1,
+      "tp": 1,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.5,
+      "recall": 1.0
+    },
+    {
+      "threshold": 0.15,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "threshold": 0.25,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    {
+      "threshold": 0.5,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0
+    }
+  ],
+  "figures": {
+    "cnn_training": "outputs/jour2/figures/cnn_training.png",
+    "detection_result": "outputs/jour2/figures/detection_result.png",
+    "precision_recall": "outputs/jour2/figures/precision_recall.png",
+    "feature_maps": "outputs/jour2/figures/feature_maps.png"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "iou_score": 0.8431372549019608,
+  "bbox_gt": [
+    40,
+    60,
+    181,
+    191
+  ],
+  "bbox_pred": [
+    52,
+    60,
+    193,
+    191
+  ],
+  "hog_dimension": 3780,
+  "hog_shifted_l2": 5.258666038513184,
+  "hog_different_l2": 8.372509002685547,
+  "sift_kp_gt": 2,
+  "sift_kp_pred": 6,
+  "sift_kp_other": 14,
+  "sift_good_matches_similar": 2,
+  "sift_good_matches_different": 0,
+  "figure_path": "outputs/jour1/figures/jour1_overview.png"
+}
