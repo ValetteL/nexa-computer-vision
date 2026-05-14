@@ -23,13 +23,18 @@ Ce fichier définit le format obligatoire pour rédiger tout chapitre de cours.
 - Corriger le gabarit et les chapitres au fur et à mesure, sans attendre la fin du module.
 - Toujours aligner le contenu sur le syllabus officiel de l'école. Chaque point du programme doit être couvert explicitement.
 - Toujours fournir les fichiers de reproductibilité projet quand du code est livré : `requirements.txt` pour l'environnement Python et `.gitignore` pour exclure environnement virtuel, caches, jetons et artefacts volumineux.
+- Fournir un script de validation autonome (par exemple `validate_labs.py`) qui teste les fonctions critiques sans lancer les modèles lourds, afin de permettre une vérification rapide après chaque modification.
 
 ## Style visuel et schéma
 
-- Utiliser des diagrammes Mermaid pour les schémas conceptuels et les pipelines.
-- Utiliser des diagrammes ASCII pour les représentations techniques détaillées (axes, grilles, valeurs).
-- Les tableaux comparatifs sont encouragés pour opposer des méthodes ou concepts.
-- Chaque schéma doit être accompagné d'une courte explication de lecture.
+- Générer des figures PNG via des scripts Python et les versionner dans un dossier `outputs/[chapitre]/figures/`.
+- Privilégier des images réelles (photos, captures d'écran de résultats) plutôt que du texte Mermaid ou des diagrammes ASCII.
+- Les tableaux comparatifs en Markdown sont encouragés pour opposer des méthodes ou concepts.
+- Chaque figure doit être accompagnée d'un bloc de lecture structuré avec quatre points :
+  - **Contexte** : pourquoi cette figure est présentée, quel problème elle illustre.
+  - **Ce qu'on observe** : description visuelle de ce qui est montré.
+  - **Notion technique** : lien avec le concept enseigné, mécanisme sous-jacent.
+  - **Message à retenir** : une phrase qui résume l'idée clé à retenir.
 
 ## Règle mathématique obligatoire
 
@@ -218,8 +223,9 @@ pip install [DEPENDANCES]
 
 ### 8.8 Validation technique du code
 
-- Fournir une commande de vérification rapide (syntaxe + exécution).
+- Fournir une commande de vérification rapide (syntaxe + exécution), par exemple `python -m py_compile lab.py && python lab.py`.
 - Ajouter une lecture rapide des métriques pour aider le diagnostic.
+- Optionnel : fournir un script `validate_labs.py` autonome qui teste les fonctions critiques sans lancer les modèles lourds, exécutable en quelques secondes.
 
 ### 8.9 Parcours progressif recommande
 
@@ -263,7 +269,7 @@ pip install [DEPENDANCES]
 - Contenu aligne sur le syllabus officiel (chaque point couvert).
 - Introduction présente et engageante.
 - Définitions et notions clés en début de chapitre.
-- Diagrammes Mermaid et/ou ASCII avec explication de lecture.
+- Figures PNG versionnées avec bloc de lecture structuré (Contexte / Ce qu'on observe / Notion technique / Message à retenir).
 - Formules en format math LaTeX quand nécessaire.
 - Signification de tous les symboles mathématiques.
 - Lecture mathématique présente.
