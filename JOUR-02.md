@@ -59,6 +59,12 @@ Un CNN applique successivement des filtres (convolutions) qui détectent des mot
 
 ![Schéma principe CNN](outputs/jour2/figures/schema_01_cnn_principe.png)
 
+**Lecture du schéma**
+- **Contexte** : ce schéma montre le passage d'une image brute vers une représentation exploitable par un réseau de neurones. L'objectif est de comprendre pourquoi un CNN n'analyse pas directement l'image comme une simple liste de pixels indépendants.
+- **Ce qu'on observe** : l'image traverse plusieurs filtres de convolution. Chaque filtre produit une carte d'activation qui met en évidence certains motifs locaux : contours, contrastes, textures ou formes simples.
+- **Notion technique** : une convolution apprend un petit noyau de poids partagé sur toute l'image. Ce partage rend le modèle plus efficace qu'un réseau fully connected, car le même détecteur de motif peut reconnaître un bord ou une texture à plusieurs positions.
+- **Message à retenir** : un CNN transforme progressivement les pixels en caractéristiques visuelles. Les premières couches détectent des motifs simples ; les couches profondes combinent ces motifs pour reconnaître des objets.
+
 ### 4.2 Les couches fondamentales
 
 **Couche de convolution**
@@ -109,17 +115,23 @@ Feature map (4x4)           Max pooling (2x2, stride 2)    Résultat (2x2)
 
 ![Schéma architecture CNN typique](outputs/jour2/figures/schema_02_architecture_cnn.png)
 
-**Lecture de l'architecture**
-- Les premières couches détectent des motifs simples (bords, coins).
-- Les couches intermédiaires combinent ces motifs en formes plus complexes.
-- Les couches profondes reconnaissent des objets entiers ou des parties significatives.
-- La couche finale (softmax) attribue une probabilité à chaque classe.
+**Lecture du schéma**
+- **Contexte** : ce schéma représente l'organisation classique d'un CNN de classification. Il sert à relier les blocs théoriques vus séparément, convolution, ReLU, pooling et couche fully connected.
+- **Ce qu'on observe** : l'image conserve d'abord une structure spatiale, puis sa résolution diminue pendant que le nombre de cartes de caractéristiques augmente. En fin de réseau, les cartes sont aplaties pour produire une décision de classe.
+- **Notion technique** : les convolutions extraient les features, ReLU introduit de la non-linéarité, le pooling réduit la taille spatiale, puis les couches denses combinent les informations pour prédire une probabilité par classe.
+- **Message à retenir** : un CNN ne prend pas sa décision en une seule étape. Il construit une hiérarchie de représentations, des bords locaux jusqu'à une prédiction globale.
 
 ### 4.3 De la classification à la détection
 
 La classification répond à « Qu'est-ce que c'est ? ». La détection répond à « Qu'est-ce que c'est ET où est-ce ? ».
 
 ![Schéma classification versus détection](outputs/jour2/figures/schema_03_classification_detection.png)
+
+**Lecture du schéma**
+- **Contexte** : ce schéma compare deux tâches proches mais différentes. La classification identifie le contenu principal d'une image, tandis que la détection doit aussi localiser chaque objet.
+- **Ce qu'on observe** : dans la partie classification, le modèle retourne une seule étiquette pour l'image entière. Dans la partie détection, le modèle retourne plusieurs boîtes, chacune associée à une classe et à un score de confiance.
+- **Notion technique** : la détection ajoute une régression de coordonnées `(x1, y1, x2, y2)` à la prédiction de classe. Le modèle doit donc optimiser simultanément une tâche sémantique, reconnaître l'objet, et une tâche géométrique, placer correctement la boîte.
+- **Message à retenir** : détecter est plus difficile que classifier. Un bon détecteur doit répondre correctement à deux questions : « quoi ? » et « où ? ».
 
 **Évolution des architectures de détection**
 
@@ -138,11 +150,11 @@ Faster R-CNN combine deux réseaux :
 
 ![Schéma architecture Faster R-CNN](outputs/jour2/figures/schema_04_faster_rcnn.png)
 
-**Lecture de l'architecture Faster R-CNN**
-- Le *backbone* (ResNet, VGG) extrait des feature maps de l'image.
-- Le RPN génère des *anchors* (boîtes de référence) et prédit lesquelles contiennent un objet.
-- Le RoI Pooling extrait des features de taille fixe pour chaque proposition.
-- La tête de classification détermine la classe et affine les coordonnées de la boîte.
+**Lecture du schéma**
+- **Contexte** : ce schéma présente un détecteur two-stage. Faster R-CNN sépare explicitement la recherche des zones intéressantes et la classification précise de ces zones.
+- **Ce qu'on observe** : l'image passe d'abord dans un backbone CNN qui produit des feature maps. Le RPN propose ensuite des régions candidates, puis chaque région est normalisée par RoI Pooling avant d'être classifiée et ajustée.
+- **Notion technique** : le RPN remplace les anciennes propositions externes comme Selective Search par un module appris. Les anchors servent de boîtes de départ ; le réseau prédit ensuite un score d'objet et des corrections de coordonnées.
+- **Message à retenir** : Faster R-CNN est précis car il vérifie les régions candidates en deux temps. Cette précision a un coût : l'architecture est plus lourde et généralement plus lente qu'un détecteur one-stage comme YOLO.
 
 ## 5. Fondements mathématiques
 

@@ -59,6 +59,12 @@ Contrairement à Faster R-CNN qui procède en deux étapes (propositions → cla
 
 ![Schéma principe YOLO](outputs/jour3/figures/schema_01_yolo_principe.png)
 
+**Lecture du schéma**
+- **Contexte** : ce schéma introduit la logique YOLO, conçue pour détecter rapidement des objets en une seule passe réseau. Il faut le lire comme une alternative directe au fonctionnement en deux étapes de Faster R-CNN.
+- **Ce qu'on observe** : l'image est divisée en grille. Chaque cellule participe à la prédiction de boîtes, de scores de confiance et de classes, puis les détections les plus pertinentes sont conservées.
+- **Notion technique** : YOLO formule la détection comme une régression dense. Au lieu de générer d'abord des propositions de régions, le réseau prédit directement les coordonnées, la confiance et les probabilités de classe depuis les features globales de l'image.
+- **Message à retenir** : YOLO gagne en vitesse parce qu'il regarde l'image une seule fois. Cette approche est particulièrement adaptée aux contraintes temps réel, par exemple vidéo, robotique ou surveillance.
+
 ### 4.2 Architecture YOLOv3
 
 YOLOv3 introduit trois innovations majeures :
@@ -68,6 +74,12 @@ YOLOv3 introduit trois innovations majeures :
 3. **Anchors améliorés** : 9 anchors (3 par échelle) appris par k-means sur COCO.
 
 ![Schéma YOLOv3 multi-échelle](outputs/jour3/figures/schema_02_yolov3_multiscale.png)
+
+**Lecture du schéma**
+- **Contexte** : ce schéma montre pourquoi YOLOv3 améliore la détection d'objets de tailles différentes. Une seule résolution de sortie détecte mal à la fois les petits objets et les grands objets.
+- **Ce qu'on observe** : le réseau produit trois sorties de détection à des échelles différentes. Les cartes à haute résolution conservent plus de détails pour les petits objets, tandis que les cartes plus profondes capturent mieux les grands objets et le contexte global.
+- **Notion technique** : YOLOv3 utilise des anchors répartis sur plusieurs échelles. Chaque échelle prédit des boîtes adaptées à certains ordres de grandeur, ce qui réduit les erreurs lorsque les objets occupent des tailles très différentes dans l'image.
+- **Message à retenir** : la détection multi-échelle permet de traiter simultanément petits, moyens et grands objets. C'est une idée centrale des détecteurs modernes.
 
 ### 4.3 Grille et prédiction par cellule
 
@@ -107,6 +119,12 @@ Image divisée en grille S x S (ex. : 13 x 13)
 ```
 
 ![Schéma comparaison Faster R-CNN et YOLO](outputs/jour3/figures/schema_03_comparaison_detecteurs.png)
+
+**Lecture du schéma**
+- **Contexte** : ce schéma synthétise le compromis principal du Jour 3 : précision maximale contre vitesse d'inférence. Il met en parallèle le détecteur two-stage du Jour 2 et le détecteur one-stage étudié ici.
+- **Ce qu'on observe** : Faster R-CNN suit un pipeline plus long avec propositions de régions, extraction RoI et classification finale. YOLO suit un pipeline plus direct, où les boîtes et classes sont prédites ensemble depuis une seule passe.
+- **Notion technique** : les architectures two-stage consacrent plus de calcul à l'analyse fine des régions candidates. Les architectures one-stage densifient les prédictions sur l'image entière, ce qui réduit la latence mais peut demander plus d'attention sur les seuils, anchors et NMS.
+- **Message à retenir** : il n'existe pas de meilleur détecteur universel. Pour une application temps réel, YOLO est souvent préférable ; pour une analyse hors ligne où la précision prime, Faster R-CNN peut rester pertinent.
 
 ### 4.5 NMS — Non-Maximum Suppression
 

@@ -73,12 +73,19 @@ La même image peut être exploitée selon trois objectifs différents. Le passa
 
 ![Classification, détection et reconnaissance sur une image réelle](outputs/jour1/figures/01_task_comparison.png)
 
+**Lecture de l'image**
+- **Contexte** : cette figure utilise la même photo réelle pour comparer trois objectifs de vision par ordinateur. Elle sert à distinguer clairement les sorties attendues avant d'aborder les modèles.
+- **Ce qu'on observe** : en classification, toute l'image reçoit une seule étiquette globale. En détection, l'objet est localisé avec une boîte. En reconnaissance, on part d'une zone déjà localisée pour chercher une identité ou une référence plus précise.
+- **Notion technique** : ces trois tâches ne produisent pas le même type de sortie : label global, boîtes avec classes, puis identité fine. Elles ne s'évaluent donc pas avec exactement les mêmes métriques.
+- **Message à retenir** : plus on va de la classification vers la reconnaissance, plus la sortie attendue devient précise et contraignante.
+
 ![Schéma classification, détection et reconnaissance](outputs/jour1/figures/schema_01_taches_vision.png)
 
 **Lecture du schéma**
-- La classification donne une réponse globale à l'image entière.
-- La détection localise et classe plusieurs objets simultanément.
-- La reconnaissance affine la détection pour identifier l'objet de manière précise.
+- **Contexte** : le schéma formalise la différence entre classification, détection et reconnaissance. Il transforme l'exemple visuel précédent en pipeline conceptuel.
+- **Ce qu'on observe** : l'image brute peut aller directement vers une classification globale, ou vers une détection qui produit des boîtes. La reconnaissance arrive ensuite comme une étape plus fine appliquée sur une région déjà trouvée.
+- **Notion technique** : la détection ajoute une localisation spatiale, puis la reconnaissance ajoute une identification fine. Faster R-CNN et YOLO feront surtout de la détection ; le projet bonus de reconnaissance faciale illustre la reconnaissance.
+- **Message à retenir** : classifier, détecter et reconnaître sont trois niveaux différents d'analyse, même lorsqu'ils utilisent la même image de départ.
 
 ### 4.3 Cas d'usage concrets
 
@@ -105,7 +112,19 @@ Le pipeline ci-dessous montre la chaîne utilisée dans le lab : une image réel
 
 ![Pipeline de vision sur image réelle](outputs/jour1/figures/02_cv_pipeline_real.png)
 
+**Lecture de l'image**
+- **Contexte** : cette figure montre un pipeline de vision appliqué à une image réelle. Elle relie les opérations OpenCV de base à une première forme de localisation d'objet.
+- **Ce qu'on observe** : l'image couleur est convertie en niveaux de gris, puis transformée par seuillage. Les contours sont extraits et certaines zones deviennent des boîtes candidates.
+- **Notion technique** : chaque étape réduit ou restructure l'information : couleur vers intensité, intensité vers masque binaire, masque vers contours, contours vers coordonnées de boîtes.
+- **Message à retenir** : au Jour 1, le but n'est pas une détection parfaite, mais la compréhension du passage d'une image brute à une information structurée.
+
 ![Schéma pipeline de vision par ordinateur](outputs/jour1/figures/schema_02_pipeline_vision.png)
+
+**Lecture du schéma**
+- **Contexte** : ce schéma donne la version abstraite du pipeline de vision par ordinateur. Il sert de fil conducteur pour tout le module.
+- **Ce qu'on observe** : l'image passe par l'acquisition, le prétraitement, l'extraction de caractéristiques, la prédiction, l'évaluation puis l'interprétation métier.
+- **Notion technique** : une erreur tôt dans la chaîne, par exemple une mauvaise lecture couleur ou un mauvais seuillage, peut se propager jusqu'à la décision finale.
+- **Message à retenir** : les étapes simples du Jour 1 restent importantes même lorsque les Jours 2 et 3 utilisent des modèles profonds.
 
 **Lecture du pipeline**
 1. **Acquisition** : capturer l'image (caméra, fichier, flux vidéo).
@@ -121,6 +140,12 @@ Le pipeline ci-dessous montre la chaîne utilisée dans le lab : une image réel
 Une image numérique est un tableau. En couleur, chaque pixel contient trois valeurs. OpenCV lit ces valeurs en ordre **BGR**, alors que Matplotlib les affiche généralement en **RGB**.
 
 ![Représentation numérique d'un pixel sur image réelle](outputs/jour1/figures/03_image_representation_pixels.png)
+
+**Lecture de l'image**
+- **Contexte** : cette figure relie l'image visible à sa représentation numérique. Elle montre ce qu'un programme manipule réellement lorsqu'il lit une image.
+- **Ce qu'on observe** : le zoom pixelisé rappelle qu'une image est une matrice de valeurs. Le pixel sélectionné possède trois composantes de couleur.
+- **Notion technique** : Matplotlib affiche généralement en RGB, alors qu'OpenCV lit les images en BGR. Cette différence peut inverser les couleurs si elle n'est pas gérée explicitement.
+- **Message à retenir** : une image est un tableau numérique ; comprendre sa forme et l'ordre des canaux évite des erreurs invisibles dans les traitements suivants.
 
 **À retenir**
 - Une image couleur OpenCV a une forme `(hauteur, largeur, 3)`.
@@ -191,6 +216,12 @@ Sur une vraie image, l'histogramme révèle immédiatement si l'information est 
 
 ![Histogramme d'une image réelle](outputs/jour1/figures/04_histogram_real_image.png)
 
+**Lecture de l'image**
+- **Contexte** : cette figure introduit l'histogramme comme outil d'analyse de luminosité et de contraste. Elle permet de comprendre l'image sans se limiter à l'observation visuelle.
+- **Ce qu'on observe** : l'image réelle est affichée à gauche et la distribution des intensités à droite. Les pics indiquent les valeurs très présentes dans l'image.
+- **Notion technique** : un histogramme concentré dans les faibles intensités indique une image sombre ; un histogramme étalé indique plus de contraste. Les courbes par canal montrent que chaque couleur porte une information différente.
+- **Message à retenir** : l'histogramme aide à choisir un prétraitement adapté, par exemple égalisation, seuillage ou normalisation.
+
 ```python
 import cv2
 import numpy as np
@@ -223,6 +254,12 @@ L'égalisation redistribue les intensités pour améliorer le contraste d'une im
 
 ![Égalisation d'histogramme avant/après](outputs/jour1/figures/05_equalization_before_after.png)
 
+**Lecture de l'image**
+- **Contexte** : cette figure montre l'effet d'une égalisation d'histogramme sur une image à faible contraste. Elle illustre un prétraitement classique avant analyse.
+- **Ce qu'on observe** : avant égalisation, les intensités occupent une plage limitée. Après égalisation, les niveaux sont redistribués sur une plage plus large et certains détails deviennent plus visibles.
+- **Notion technique** : l'égalisation applique une transformation cumulative des intensités. Elle améliore souvent le contraste local ou global, mais modifie aussi la distribution statistique de l'image.
+- **Message à retenir** : améliorer le contraste peut aider la détection, mais ce n'est pas une opération neutre ; il faut vérifier son effet sur les données réelles.
+
 ```python
 import cv2
 
@@ -253,6 +290,12 @@ Sur une image réelle, le choix du seuil influence fortement le résultat. Un se
 
 ![Comparaison de seuillages sur image réelle](outputs/jour1/figures/06_thresholding_comparison.png)
 
+**Lecture de l'image**
+- **Contexte** : cette figure compare plusieurs méthodes de seuillage sur une image réelle. Elle montre pourquoi une méthode simple peut être fragile selon l'éclairage.
+- **Ce qu'on observe** : le seuil fixe applique la même règle partout, Otsu choisit automatiquement un seuil global, et le seuil adaptatif varie localement selon le voisinage.
+- **Notion technique** : le seuillage transforme une image d'intensités en masque binaire. Cette transformation impose une séparation entre objet et fond, souvent sensible au contraste et à la luminosité.
+- **Message à retenir** : aucun seuil n'est universel. Il faut choisir la méthode selon la distribution des intensités et les variations locales de l'image.
+
 ```python
 # Seuillage binaire simple
 _, binaire = cv2.threshold(gris, 127, 255, cv2.THRESH_BINARY)
@@ -277,6 +320,12 @@ adaptatif = cv2.adaptiveThreshold(
 Après le seuillage, l'étape naturelle est d'extraire les contours pour isoler les objets. C'est le lien direct avec la détection vue au Jour 2.
 
 ![Contours et boîtes candidates sur image réelle](outputs/jour1/figures/07_contours_and_boxes.png)
+
+**Lecture de l'image**
+- **Contexte** : cette figure relie le traitement d'image classique à la notion de détection. Elle montre comment passer d'un masque ou de contours à des zones localisées.
+- **Ce qu'on observe** : Canny met en évidence les discontinuités fortes, comme les bords d'objet, les textures et les transitions de luminosité. Certains contours sont ensuite convertis en boîtes candidates.
+- **Notion technique** : une boîte candidate donne des coordonnées spatiales, mais pas encore une classe fiable ni un score de confiance appris. Elle localise une région plausible sans comprendre son contenu.
+- **Message à retenir** : les contours introduisent la localisation ; Faster R-CNN et YOLO généraliseront cette idée avec des modèles capables de classer et scorer les objets.
 
 ```python
 import cv2
@@ -421,6 +470,12 @@ La figure ci-dessous montre deux boîtes partiellement superposées. La zone vio
 
 ![Visualisation de l'IoU avec intersection et union](outputs/jour1/figures/08_iou_visual_explanation.png)
 
+**Lecture de l'image**
+- **Contexte** : cette figure visualise l'IoU, la métrique centrale pour évaluer une localisation. Elle rend concrète la formule mathématique précédente.
+- **Ce qu'on observe** : la boîte verte représente la vérité terrain et la boîte orange une prédiction. La zone violette correspond à l'intersection, c'est-à-dire la partie commune aux deux boîtes.
+- **Notion technique** : l'IoU compare l'aire d'intersection à l'aire d'union. Une prédiction trop décalée, trop grande ou trop petite fait baisser le score.
+- **Message à retenir** : l'IoU transforme une impression visuelle de qualité de localisation en score objectif compris entre 0 et 1.
+
 ### 7.5 Distance euclidienne entre descripteurs
 
 $$
@@ -445,6 +500,12 @@ HOG résume la structure globale des contours d'une image sous forme d'histogram
 
 ![Visualisation des gradients et principe HOG](outputs/jour1/figures/09_hog_gradient_visualization.png)
 
+**Lecture de l'image**
+- **Contexte** : cette figure introduit HOG, un descripteur classique basé sur les orientations de gradients. Elle montre ce que HOG retient d'une image.
+- **Ce qu'on observe** : la première vue est l'image en niveaux de gris. La seconde met en évidence la magnitude des gradients, où les zones claires correspondent aux bords. L'histogramme regroupe ensuite les orientations dominantes.
+- **Notion technique** : HOG encode la structure locale des contours dans des cellules, puis normalise ces informations par blocs pour limiter l'effet des variations de luminosité.
+- **Message à retenir** : HOG ne reconnaît pas directement un objet ; il produit un vecteur qui décrit sa géométrie de contours.
+
 **Fonctionnement**
 1. Calcul des gradients horizontaux et verticaux de l'image.
 2. Division de l'image en cellules (ex. : 8x8 pixels).
@@ -452,6 +513,12 @@ HOG résume la structure globale des contours d'une image sous forme d'histogram
 4. Normalisation par blocs de cellules pour la robustesse à la luminosité.
 
 ![Schéma pipeline HOG](outputs/jour1/figures/schema_03_hog_pipeline.png)
+
+**Lecture du schéma**
+- **Contexte** : ce schéma détaille les étapes internes de HOG. Il complète la visualisation précédente avec une lecture algorithmique.
+- **Ce qu'on observe** : l'image est convertie en gradients, découpée en cellules, résumée par histogrammes locaux, puis normalisée par blocs.
+- **Notion technique** : le résultat final est un vecteur numérique de taille fixe. Ce vecteur peut être donné à un classifieur classique, par exemple SVM, pour détecter une catégorie d'objet.
+- **Message à retenir** : HOG est une méthode structurée et interprétable, mais ses caractéristiques sont conçues manuellement et non apprises à partir des données.
 
 **Points importants**
 - Sensible à la géométrie globale de l'objet.
@@ -465,6 +532,12 @@ SIFT détecte des points clés locaux invariants à l'échelle et à la rotation
 
 ![Matching SIFT entre image réelle et image transformée](outputs/jour1/figures/10_sift_keypoints_matching.png)
 
+**Lecture de l'image**
+- **Contexte** : cette figure illustre SIFT, une méthode de matching local entre deux images. Elle sert à comprendre comment reconnaître un même objet malgré une transformation.
+- **Ce qu'on observe** : les deux images sont proches mais pas identiques. Les lignes relient des points clés dont les descripteurs se ressemblent suffisamment.
+- **Notion technique** : chaque point clé possède un descripteur local robuste à l'échelle et à la rotation. Le matching compare ces vecteurs, souvent avec une distance euclidienne et le ratio test de Lowe.
+- **Message à retenir** : SIFT est adapté à la reconnaissance par correspondances locales, surtout quand l'objet peut changer de taille, d'orientation ou de position.
+
 **Fonctionnement**
 1. Détection de points clés à différentes échelles (Difference of Gaussians).
 2. Attribution d'une orientation dominante a chaque point cle.
@@ -472,6 +545,12 @@ SIFT détecte des points clés locaux invariants à l'échelle et à la rotation
 4. Matching par distance euclidienne avec le test de ratio de Lowe.
 
 ![Schéma pipeline SIFT](outputs/jour1/figures/schema_04_sift_pipeline.png)
+
+**Lecture du schéma**
+- **Contexte** : ce schéma présente la chaîne complète SIFT. Il montre comment passer d'une image à des correspondances exploitables.
+- **Ce qu'on observe** : SIFT détecte d'abord des points stables à plusieurs échelles, leur attribue une orientation, calcule un descripteur, puis compare les descripteurs entre images.
+- **Notion technique** : le descripteur SIFT encode le voisinage d'un point en 128 dimensions. Le ratio test de Lowe élimine les correspondances ambiguës lorsque les deux meilleurs voisins sont trop proches.
+- **Message à retenir** : SIFT ne décrit pas toute l'image en un seul vecteur ; il construit un ensemble de points locaux robustes que l'on peut apparier.
 
 **Test de ratio de Lowe**
 Pour chaque descripteur, on trouve les 2 plus proches voisins. Le match est valide si :
@@ -503,6 +582,12 @@ Ou $d_1$ est la distance au plus proche voisin et $d_2$ au second. Cela elimine 
 ```
 
 ![Schéma comparatif HOG et SIFT](outputs/jour1/figures/schema_05_hog_vs_sift.png)
+
+**Lecture du schéma**
+- **Contexte** : ce schéma compare deux familles de descripteurs classiques. Il aide à choisir la méthode selon le problème visé.
+- **Ce qu'on observe** : HOG décrit globalement une fenêtre d'image, alors que SIFT décrit localement des points clés. Les sorties et les usages ne sont donc pas les mêmes.
+- **Notion technique** : HOG produit un vecteur de taille fixe, pratique pour une classification sur fenêtres. SIFT produit un nombre variable de descripteurs locaux, pratique pour le matching et la reconnaissance malgré certaines transformations.
+- **Message à retenir** : HOG et SIFT sont des références historiques utiles pour comprendre les features, avant de passer aux caractéristiques apprises automatiquement par les CNN.
 
 ## 9. Exemples Python par concept
 
