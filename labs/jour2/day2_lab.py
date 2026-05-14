@@ -2,6 +2,10 @@
 """
 Lab Jour 2 — CNN et Faster R-CNN
 Construire un CNN simple + utiliser Faster R-CNN pré-entraîné
+
+Le lab illustre deux niveaux de vision profonde :
+- classification d'images avec un petit CNN entraîné from scratch ;
+- détection d'objet avec un Faster R-CNN pré-entraîné sur COCO.
 """
 
 import json
@@ -12,6 +16,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib
+# Backend sans interface graphique : les figures sont sauvegardées en PNG,
+# ce qui fonctionne aussi en serveur, Docker ou SSH.
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2, FasterRCNN_ResNet50_FPN_V2_Weights
@@ -19,13 +25,22 @@ from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2, FasterRCNN_
 
 REAL_IMAGE_PATH = "labs/shared/assets/coco_dog.jpg"
 SYNTHETIC_IMAGE_PATH = "labs/jour2/assets/test_detection.png"
+
+# Boîte vérité terrain approximative du chien dans l'image réelle. Elle sert à
+# calculer l'IoU avec les prédictions Faster R-CNN.
 REAL_DOG_GT_BOX = (50, 35, 645, 555)
 RANDOM_SEED = 42
 
 
 class SimpleCNN(nn.Module):
+    """Petit CNN pédagogique pour classifier rectangles, cercles et triangles."""
+
     def __init__(self, num_classes=3):
         super().__init__()
+
+        # Bloc d'extraction de caractéristiques : deux convolutions suivies de
+        # ReLU et max-pooling. Les convolutions apprennent des motifs visuels ;
+        # le pooling réduit la taille spatiale et rend le modèle plus robuste.
         self.features = nn.Sequential(
             nn.Conv2d(3, 32, kernel_size=3, padding=1),
             nn.ReLU(),
@@ -34,6 +49,9 @@ class SimpleCNN(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(2),
         )
+
+        # Après deux MaxPool2d(2), une image 64x64 devient 16x16. Avec 64
+        # canaux, l'entrée de la première couche linéaire vaut 64*16*16.
         self.classifier = nn.Sequential(
             nn.Flatten(),
             nn.Linear(64 * 16 * 16, 128),
@@ -42,6 +60,7 @@ class SimpleCNN(nn.Module):
         )
 
     def forward(self, x):
+        # Passage avant standard : image -> features CNN -> scores de classes.
         return self.classifier(self.features(x))
 
 
@@ -51,6 +70,8 @@ def generate_dataset(num_samples=200, img_size=64):
     y = []
     rng = np.random.RandomState(42)
     for i in range(num_samples):
+        # Chaque image est une forme colorée sur fond noir. Les variations de
+        # position, taille et couleur évitent que le CNN mémorise un seul cas.
         img = np.zeros((img_size, img_size, 3), dtype=np.uint8)
         label = i % 3
         x1 = int(rng.randint(5, 20))
@@ -60,18 +81,23 @@ def generate_dataset(num_samples=200, img_size=64):
         color = tuple(int(c) for c in rng.randint(100, 256, 3))
 
         if label == 0:
+            # Classe 0 : rectangle.
             cv2.rectangle(img, (x1, y1), (x2, y2), color, -1)
         elif label == 1:
+            # Classe 1 : cercle.
             cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
             r = min(x2 - x1, y2 - y1) // 2
             cv2.circle(img, (cx, cy), r, color, -1)
         else:
+            # Classe 2 : triangle.
             pts = np.array([[(x1+x2)//2, y1], [x1, y2], [x2, y2]], dtype=np.int32)
             cv2.fillPoly(img, [pts], color)
 
         X.append(img)
         y.append(label)
 
+    # Passage du format OpenCV/NumPy (N,H,W,C) au format PyTorch (N,C,H,W),
+    # puis normalisation des pixels dans [0,1].
     X = np.array(X, dtype=np.float32).transpose(0, 3, 1, 2) / 255.0
     y = torch.tensor(y, dtype=torch.long)
     return torch.tensor(X), y
@@ -85,6 +111,8 @@ def set_reproducible_seed(seed=RANDOM_SEED):
 
 def train_cnn(model, X, y, epochs=15, lr=0.001, batch_size=32):
     """Entraîne le CNN et retourne l'historique des pertes."""
+    # CrossEntropyLoss attend directement les logits de sortie : il applique en
+    # interne log-softmax + negative log likelihood.
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
@@ -93,6 +121,9 @@ def train_cnn(model, X, y, epochs=15, lr=0.001, batch_size=32):
     for epoch in range(epochs):
         model.train()
         epoch_loss = 0
+
+        # Mélange aléatoire à chaque epoch pour éviter un ordre d'apprentissage
+        # toujours identique.
         perm = torch.randperm(n)
         for i in range(0, n, batch_size):
             idx = perm[i:i+batch_size]
@@ -101,6 +132,8 @@ def train_cnn(model, X, y, epochs=15, lr=0.001, batch_size=32):
             optimizer.zero_grad()
             out = model(batch_x)
             loss = criterion(out, batch_y)
+
+            # Rétropropagation : calcule les gradients puis met à jour les poids.
             loss.backward()
             optimizer.step()
             epoch_loss += loss.item() * len(idx)
@@ -116,6 +149,8 @@ def train_cnn(model, X, y, epochs=15, lr=0.001, batch_size=32):
 
 def train_test_split(X, y, test_ratio=0.2, seed=42):
     """Sépare aléatoirement le dataset en sous-ensembles train/test."""
+    # Générateur local pour que le split reste reproductible sans perturber les
+    # autres tirages pseudo-aléatoires du script.
     generator = torch.Generator().manual_seed(seed)
     indices = torch.randperm(len(X), generator=generator)
     test_size = int(len(X) * test_ratio)
@@ -127,6 +162,8 @@ def train_test_split(X, y, test_ratio=0.2, seed=42):
 def evaluate_cnn(model, X, y):
     """Évalue la précision d'un CNN sur un sous-ensemble donné."""
     model.eval()
+
+    # Pas de gradient en évaluation : moins de mémoire, exécution plus rapide.
     with torch.no_grad():
         out = model(X)
         preds = out.argmax(dim=1)
@@ -135,6 +172,8 @@ def evaluate_cnn(model, X, y):
 
 def run_faster_rcnn_detection(img_path, score_thresh=0.5):
     """Exécute Faster R-CNN sur une image et retourne les détections."""
+    # Chargement d'un modèle torchvision pré-entraîné sur COCO. Il connaît donc
+    # des classes comme dog, person, car, bottle, etc.
     weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
     model = fasterrcnn_resnet50_fpn_v2(weights=weights, box_score_thresh=score_thresh)
     model.eval()
@@ -143,6 +182,8 @@ def run_faster_rcnn_detection(img_path, score_thresh=0.5):
     if img is None:
         raise FileNotFoundError(f"Image non trouvée : {img_path}")
 
+    # OpenCV lit en BGR ; PyTorch/torchvision attend un tenseur RGB (C,H,W)
+    # avec valeurs flottantes normalisées dans [0,1].
     img_tensor = torch.from_numpy(cv2.cvtColor(img, cv2.COLOR_BGR2RGB)).permute(2, 0, 1).float() / 255.0
 
     with torch.no_grad():
@@ -153,6 +194,8 @@ def run_faster_rcnn_detection(img_path, score_thresh=0.5):
 
 def draw_detections(img, boxes, labels, scores):
     """Dessine les boîtes détectées sur l'image."""
+    # Couleurs associées à quelques classes COCO utiles pour visualiser les
+    # sorties. Les classes non listées reçoivent un gris neutre.
     COCO_COLORS = {
         1: (255, 0, 0), 2: (0, 255, 0), 3: (0, 0, 255),
         16: (255, 255, 0), 17: (255, 0, 255), 18: (0, 255, 255),
@@ -169,6 +212,8 @@ def draw_detections(img, boxes, labels, scores):
 
 def compute_iou(box_a, box_b):
     """Calcule l'IoU entre deux boîtes."""
+    # Même logique que Jour 1 : intersection divisée par union. Cette fonction
+    # est répétée ici pour garder le lab autonome.
     x_left = max(box_a[0], box_b[0])
     y_top = max(box_a[1], box_b[1])
     x_right = min(box_a[2], box_b[2])
@@ -183,6 +228,8 @@ def compute_iou(box_a, box_b):
 
 def prepare_detection_image():
     """Utilise l'image réelle COCO-like si elle existe, sinon crée une image synthétique."""
+    # L'image réelle donne une sortie plus pédagogique avec Faster R-CNN. Le
+    # fallback synthétique permet toutefois au script de rester exécutable.
     if os.path.exists(REAL_IMAGE_PATH):
         return REAL_IMAGE_PATH, [REAL_DOG_GT_BOX], "real_coco_dog"
 
@@ -196,6 +243,8 @@ def prepare_detection_image():
 
 def detection_metrics_at_threshold(boxes, scores, gt_boxes, score_thresh, iou_thresh=0.5):
     """Calcule précision/rappel pour un seuil de score donné."""
+    # On garde uniquement les prédictions dont le score dépasse le seuil.
+    # C'est exactement l'effet du seuil de confiance étudié dans la détection.
     selected = [(box, score) for box, score in zip(boxes, scores) if score >= score_thresh]
     matched_gt = set()
     tp = 0
@@ -204,6 +253,9 @@ def detection_metrics_at_threshold(boxes, scores, gt_boxes, score_thresh, iou_th
     for pred_box, _ in selected:
         best_iou = 0.0
         best_idx = None
+
+        # Une prédiction ne peut correspondre qu'à une seule vérité terrain, et
+        # une vérité terrain déjà associée ne doit pas être réutilisée.
         for idx, gt_box in enumerate(gt_boxes):
             if idx in matched_gt:
                 continue
@@ -212,11 +264,14 @@ def detection_metrics_at_threshold(boxes, scores, gt_boxes, score_thresh, iou_th
                 best_iou = iou_val
                 best_idx = idx
         if best_iou >= iou_thresh and best_idx is not None:
+            # Vrai positif : la boîte prédite recouvre suffisamment une GT.
             tp += 1
             matched_gt.add(best_idx)
         else:
+            # Faux positif : détection sans GT suffisamment proche.
             fp += 1
 
+    # Faux négatifs : objets GT qui n'ont pas été détectés.
     fn = len(gt_boxes) - len(matched_gt)
     precision = tp / (tp + fp) if tp + fp else 0.0
     recall = tp / (tp + fn) if tp + fn else 0.0
@@ -225,6 +280,8 @@ def detection_metrics_at_threshold(boxes, scores, gt_boxes, score_thresh, iou_th
 
 def average_precision_from_pr_rows(pr_rows):
     """Approximation pédagogique de l'AP à partir des points précision/rappel."""
+    # Cette version n'est pas COCO officielle. Elle sert à expliquer le principe
+    # d'aire sous une courbe précision/rappel avec peu de seuils.
     by_recall = {}
     for row in pr_rows:
         recall = float(row["recall"])
@@ -243,6 +300,8 @@ def average_precision_from_pr_rows(pr_rows):
 
 def save_precision_recall_curve(boxes, scores, gt_boxes):
     """Trace la précision et le rappel selon le seuil de score."""
+    # Plusieurs seuils montrent le compromis : seuil bas = plus de détections,
+    # seuil haut = moins de détections mais souvent plus fiables.
     thresholds = [0.05, 0.1, 0.15, 0.25, 0.5]
     rows = [detection_metrics_at_threshold(boxes, scores, gt_boxes, t) for t in thresholds]
 
@@ -266,6 +325,8 @@ def save_feature_maps(model, X):
     """Visualise les premières cartes d'activation du CNN entraîné."""
     model.eval()
     with torch.no_grad():
+        # `model.features[:2]` correspond ici à Conv2d + ReLU de la première
+        # couche. On visualise donc les réponses des premiers filtres appris.
         activations = model.features[:2](X[:1]).squeeze(0).cpu().numpy()
 
     n_maps = min(8, activations.shape[0])
@@ -284,6 +345,8 @@ def save_feature_maps(model, X):
 
 
 def main():
+    # Fonction principale : orchestre classification CNN, détection Faster R-CNN,
+    # génération des figures et sauvegarde des métriques.
     set_reproducible_seed()
     os.makedirs("outputs/jour2/figures", exist_ok=True)
 
@@ -293,6 +356,8 @@ def main():
     print("=" * 50)
 
     X, y = generate_dataset(num_samples=360, img_size=64)
+
+    # Split explicite train/test pour répondre à la compétence C3.2.
     X_train, y_train, X_test, y_test = train_test_split(X, y, test_ratio=0.2, seed=42)
     model = SimpleCNN(num_classes=3)
     losses, train_accuracy = train_cnn(model, X_train, y_train, epochs=15)
@@ -301,7 +366,7 @@ def main():
     feature_maps_path = save_feature_maps(model, X_test)
     print(f"  Feature maps sauvegardées : {feature_maps_path}")
 
-    # Courbe de perte
+    # Courbe de perte : vérifie visuellement que l'entraînement converge.
     plt.figure(figsize=(8, 4))
     plt.plot(range(1, len(losses)+1), losses, marker="o", linewidth=2, color="steelblue")
     plt.title("Perte d'entraînement du CNN")
@@ -321,6 +386,9 @@ def main():
     print(f"  Image de test : {test_img_path} ({image_source})")
 
     pred, img_bgr = run_faster_rcnn_detection(test_img_path, score_thresh=0.1)
+
+    # Les sorties torchvision sont des tenseurs ; on les convertit en NumPy pour
+    # dessiner avec OpenCV et calculer les métriques simplement.
     boxes = pred["boxes"].cpu().numpy()
     labels = pred["labels"].cpu().numpy()
     scores = pred["scores"].cpu().numpy()
@@ -337,6 +405,9 @@ def main():
     ious = []
     for gt_box in gt_boxes:
         best_iou = 0
+
+        # Pour chaque GT, on garde la meilleure prédiction. Sur une seule image
+        # avec un seul chien, cela suffit pour une évaluation pédagogique.
         for pred_box in boxes:
             iou_val = compute_iou(
                 (pred_box[0], pred_box[1], pred_box[2], pred_box[3]),

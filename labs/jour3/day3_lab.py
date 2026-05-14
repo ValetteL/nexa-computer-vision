@@ -2,6 +2,10 @@
 """
 Lab Jour 3 — YOLOv8, comparaison et optimisation
 Comparer Faster R-CNN et YOLO sur les mêmes images
+
+Ce lab illustre le compromis vitesse/précision : Faster R-CNN représente une
+approche two-stage plus lourde, tandis que YOLOv8n représente une approche
+one-stage adaptée au temps réel.
 """
 
 import json
@@ -11,6 +15,8 @@ import numpy as np
 import cv2
 import torch
 import matplotlib
+# Backend non interactif : les graphiques sont sauvegardés dans `outputs/` sans
+# nécessiter de fenêtre graphique.
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from ultralytics import YOLO
@@ -18,6 +24,9 @@ from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2, FasterRCNN_
 
 
 REAL_IMAGE_PATH = "labs/shared/assets/coco_dog.jpg"
+
+# Boîte vérité terrain approximative du chien dans l'image réelle. Elle est
+# utilisée pour comparer l'IoU de Faster R-CNN et YOLOv8n.
 REAL_DOG_GT_BOX = (50, 35, 645, 555)
 RANDOM_SEED = 42
 
@@ -31,11 +40,16 @@ def set_reproducible_seed(seed=RANDOM_SEED):
 def create_test_image(path, seed=42):
     """Crée une image de test avec des formes variées."""
     rng = np.random.RandomState(seed)
+
+    # Fallback historique : il garde le lab exécutable même si l'image réelle
+    # est absente. Les formes simulent grossièrement des objets à détecter.
     img = np.zeros((480, 640, 3), dtype=np.uint8)
 
+    # Fond dégradé : rend l'image moins triviale qu'un fond uniforme.
     for y in range(480):
         img[y, :] = [int(30 + 20 * y / 480), int(30 + 15 * y / 480), int(50 + 25 * y / 480)]
 
+    # Formes de tailles différentes pour discuter petits/moyens/grands objets.
     cv2.rectangle(img, (80, 100), (200, 350), (180, 120, 80), -1)
     cv2.circle(img, (450, 250), 80, (200, 150, 0), -1)
     cv2.rectangle(img, (300, 300), (500, 420), (100, 100, 100), -1)
@@ -47,6 +61,8 @@ def create_test_image(path, seed=42):
 
 def load_detection_image(path):
     """Charge l'image réelle si disponible, sinon génère l'image synthétique historique."""
+    # L'image réelle est privilégiée car les modèles pré-entraînés sur COCO
+    # répondent beaucoup mieux à des objets naturels qu'à des formes abstraites.
     if os.path.exists(REAL_IMAGE_PATH):
         img = cv2.imread(REAL_IMAGE_PATH)
         if img is None:
@@ -60,6 +76,8 @@ def load_detection_image(path):
 
 def compute_iou(box_a, box_b):
     """Calcule l'IoU entre deux boîtes."""
+    # Fonction autonome pour éviter une dépendance au lab Jour 1. Le format est
+    # toujours x1, y1, x2, y2.
     x_left = max(box_a[0], box_b[0])
     y_top = max(box_a[1], box_b[1])
     x_right = min(box_a[2], box_b[2])
@@ -74,18 +92,23 @@ def compute_iou(box_a, box_b):
 
 def run_frcnn(img, model, score_thresh=0.25):
     """Exécute Faster R-CNN."""
+    # Conversion OpenCV BGR -> RGB puis HWC -> CHW, comme dans le Jour 2.
     tensor = torch.from_numpy(cv2.cvtColor(img, cv2.COLOR_BGR2RGB)).permute(2, 0, 1).float() / 255.0
     with torch.no_grad():
         pred = model([tensor])[0]
     boxes = pred["boxes"].cpu().numpy()
     scores = pred["scores"].cpu().numpy()
     labels = pred["labels"].cpu().numpy()
+
+    # Filtrage par score pour contrôler le compromis précision/rappel.
     mask = scores >= score_thresh
     return boxes[mask], scores[mask], labels[mask]
 
 
 def run_yolo(img, model, conf_thresh=0.25):
     """Exécute YOLOv8."""
+    # Ultralytics accepte directement une image NumPy OpenCV. Le seuil `conf`
+    # joue le même rôle que `score_thresh` côté Faster R-CNN.
     results = model(img, conf=conf_thresh, verbose=False)
     boxes = results[0].boxes.xyxy.cpu().numpy()
     scores = results[0].boxes.conf.cpu().numpy()
@@ -95,6 +118,8 @@ def run_yolo(img, model, conf_thresh=0.25):
 
 def benchmark(name, run_fn, img, num_runs=5):
     """Mesure le temps d'inférence."""
+    # On répète plusieurs fois pour lisser les variations CPU ponctuelles. Le
+    # premier passage peut inclure des coûts de cache/initialisation.
     times = []
     for _ in range(num_runs):
         start = time.time()
@@ -105,6 +130,7 @@ def benchmark(name, run_fn, img, num_runs=5):
 
 def precision_recall_at_threshold(boxes, scores, gt_boxes, score_thresh, iou_thresh=0.5):
     """Calcule précision/rappel pour un seuil de score donné."""
+    # Sélection des prédictions conservées à ce seuil.
     selected = [(box, score) for box, score in zip(boxes, scores) if score >= score_thresh]
     matched_gt = set()
     tp = 0
@@ -113,6 +139,8 @@ def precision_recall_at_threshold(boxes, scores, gt_boxes, score_thresh, iou_thr
     for pred_box, _ in selected:
         best_iou = 0.0
         best_idx = None
+
+        # Recherche du meilleur objet GT non encore associé à cette prédiction.
         for idx, gt_box in enumerate(gt_boxes):
             if idx in matched_gt:
                 continue
@@ -121,11 +149,14 @@ def precision_recall_at_threshold(boxes, scores, gt_boxes, score_thresh, iou_thr
                 best_iou = iou_val
                 best_idx = idx
         if best_iou >= iou_thresh and best_idx is not None:
+            # La prédiction localise suffisamment un objet réel.
             tp += 1
             matched_gt.add(best_idx)
         else:
+            # La prédiction ne correspond à aucun objet GT : faux positif.
             fp += 1
 
+    # Les GT restantes sont les objets manqués par le détecteur.
     fn = len(gt_boxes) - len(matched_gt)
     precision = tp / (tp + fp) if tp + fp else 0.0
     recall = tp / (tp + fn) if tp + fn else 0.0
@@ -134,6 +165,8 @@ def precision_recall_at_threshold(boxes, scores, gt_boxes, score_thresh, iou_thr
 
 def average_precision_from_pr_rows(pr_rows):
     """Approximation pédagogique de l'AP à partir des points précision/rappel."""
+    # Comme au Jour 2, ce calcul sert à comprendre l'idée AP/mAP sans mettre en
+    # place toute la procédure COCO officielle.
     by_recall = {}
     for row in pr_rows:
         recall = float(row["recall"])
@@ -152,8 +185,10 @@ def average_precision_from_pr_rows(pr_rows):
 
 def draw_detections(img, boxes, scores, labels, color, title):
     """Dessine les détections sur l'image."""
+    # L'image est copiée pour conserver une version brute réutilisable.
     out = img.copy()
     for box, score, label in zip(boxes, scores, labels):
+        # Seul le score est affiché pour éviter de surcharger la visualisation.
         x1, y1, x2, y2 = int(box[0]), int(box[1]), int(box[2]), int(box[3])
         cv2.rectangle(out, (x1, y1), (x2, y2), color, 2)
         cv2.putText(out, f"{score:.2f}", (x1, y1 - 5),
@@ -164,6 +199,8 @@ def draw_detections(img, boxes, scores, labels, color, title):
 
 def best_ious(pred_boxes, gt_boxes):
     """Calcule le meilleur IoU pour chaque GT."""
+    # Pour chaque objet réel, on cherche la prédiction qui le recouvre le mieux.
+    # Cette métrique simple est très lisible pour comparer deux détecteurs.
     ious_per_gt = []
     for gt_box in gt_boxes:
         best_iou = 0
@@ -178,25 +215,36 @@ def best_ious(pred_boxes, gt_boxes):
 
 
 def main():
+    # Orchestration complète : chargement modèles, benchmark, IoU, figures,
+    # sweep de seuil et rapport JSON.
     set_reproducible_seed()
     os.makedirs("outputs/jour3/figures", exist_ok=True)
 
     print("Chargement des modèles...")
+
+    # Faster R-CNN : modèle lourd mais précis, chargé depuis torchvision.
     model_frcnn = fasterrcnn_resnet50_fpn_v2(
         weights=FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT,
         box_score_thresh=0.25
     )
     model_frcnn.eval()
+
+    # YOLOv8n : version nano, plus rapide et adaptée à la démonstration CPU.
     model_yolo = YOLO("yolov8n.pt")
 
     img_path = "labs/jour3/test_image.png"
     os.makedirs(os.path.dirname(img_path), exist_ok=True)
+
+    # On charge l'image réelle si elle existe, sinon le fallback synthétique.
     img, img_path, gt_boxes, image_source = load_detection_image(img_path)
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     print(f"Image de test : {img_path} ({img.shape[1]}x{img.shape[0]}, {image_source})")
 
     print("\nBenchmark Faster R-CNN...")
+
+    # Benchmark et prédictions finales sont séparés : le benchmark mesure le
+    # temps moyen, puis on réutilise une prédiction pour les métriques.
     frcnn_time = benchmark("Faster R-CNN", lambda im: run_frcnn(im, model_frcnn), img, num_runs=3)
     frcnn_boxes, frcnn_scores, frcnn_labels = run_frcnn(img, model_frcnn)
     print(f"  Temps : {frcnn_time['mean']:.3f}s ± {frcnn_time['std']:.3f}s")
@@ -211,6 +259,7 @@ def main():
     speedup = frcnn_time["mean"] / yolo_time["mean"] if yolo_time["mean"] > 0 else float("inf")
     print(f"\nYOLOv8n est {speedup:.1f}x plus rapide que Faster R-CNN")
 
+    # Figure 1 : comparaison des temps d'inférence.
     plt.figure(figsize=(8, 4))
     models = ["Faster R-CNN", "YOLOv8n"]
     times = [frcnn_time["mean"], yolo_time["mean"]]
@@ -235,6 +284,7 @@ def main():
     print(f"IoU moyen Faster R-CNN : {np.mean(frcnn_ious):.3f}")
     print(f"IoU moyen YOLOv8n        : {np.mean(yolo_ious):.3f}")
 
+    # Figure 2 : comparaison IoU par objet GT.
     plt.figure(figsize=(8, 4))
     x = np.arange(len(gt_boxes))
     width = 0.35
@@ -251,6 +301,7 @@ def main():
     plt.savefig("outputs/jour3/figures/iou_comparison.png", dpi=130)
     plt.close()
 
+    # Figure 3 : visualisation côte à côte des détections.
     frcnn_vis = draw_detections(img, frcnn_boxes, frcnn_scores, frcnn_labels,
                                 (255, 0, 0), f"Faster R-CNN ({len(frcnn_boxes)} detections)")
     yolo_vis = draw_detections(img, yolo_boxes, yolo_scores, yolo_labels,
@@ -265,6 +316,8 @@ def main():
     thresholds = [0.1, 0.25, 0.5, 0.75]
     threshold_results = []
     for thresh in thresholds:
+        # Le sweep montre comment le seuil modifie le nombre de détections et
+        # donc le compromis entre faux positifs et faux négatifs.
         boxes, scores, labels = run_yolo(img, model_yolo, conf_thresh=thresh)
         ious = best_ious(boxes, gt_boxes)
         avg_iou = float(np.mean(ious)) if ious else 0.0
@@ -280,6 +333,7 @@ def main():
 
     yolo_ap50 = average_precision_from_pr_rows(threshold_results)
 
+    # Figure 4 : nombre de détections et IoU moyen en fonction du seuil.
     plt.figure(figsize=(8, 4))
     xs = [row["threshold"] for row in threshold_results]
     counts = [row["num_detections"] for row in threshold_results]
@@ -303,6 +357,8 @@ def main():
     print(f"  Courbe de seuil sauvegardée : {threshold_path}")
 
     metrics = {
+        # Rapport JSON : structure pensée pour être relue dans un compte rendu
+        # étudiant ou par un script de validation.
         "speed": {
             "faster_rcnn_mean_s": round(frcnn_time["mean"], 4),
             "yolov8n_mean_s": round(yolo_time["mean"], 4),

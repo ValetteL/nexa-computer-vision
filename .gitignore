@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 token.txt
 yolov8n.pt
+labs/projet_face/models/

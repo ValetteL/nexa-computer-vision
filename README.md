@@ -102,6 +102,7 @@ Le projet contient une version complète du module sur 3 jours : cours, labs Pyt
 - `JOUR-01.md` : fondamentaux OpenCV, IoU, HOG et SIFT.
 - `JOUR-02.md` : CNN avec PyTorch et détection Faster R-CNN.
 - `JOUR-03.md` : comparaison Faster R-CNN / YOLOv8n et optimisation du seuil de confiance.
+- `PROJET-RECONNAISSANCE-FACIALE.md` : projet bonus non noté avec énoncé et corrigé autour de Keanu Reeves.
 - `labs/` : scripts exécutables par jour.
 - `validate_labs.py` : validation technique rapide sans exécuter les modèles lourds.
 - `labs/shared/assets/coco_dog.jpg` : image réelle libre utilisée par les labs de détection.
@@ -122,6 +123,7 @@ pip install -r requirements.txt
 
 ```bash
 .venv/bin/python -m py_compile labs/jour1/day1_lab.py labs/jour1/day1_minimal_iou.py labs/jour2/day2_lab.py labs/jour3/day3_lab.py
+.venv/bin/python -m py_compile labs/projet_face/face_actor_demo.py
 .venv/bin/python validate_labs.py
 ```
 
@@ -130,6 +132,8 @@ Les labs peuvent ensuite être exécutés individuellement depuis la racine du p
 Les scripts `labs/jour2/day2_lab.py` et `labs/jour3/day3_lab.py` chargent des modèles pré-entraînés. Faster R-CNN peut télécharger automatiquement ses poids via `torchvision` si le cache local est vide. YOLOv8n utilise `yolov8n.pt` à la racine du projet ; si le fichier est absent, Ultralytics tentera de le récupérer automatiquement.
 
 Les métriques `ap50_simplified` et `map50_simplified` générées par les labs sont des approximations pédagogiques sur une seule classe et quelques seuils. Elles servent à illustrer la logique AP/mAP, mais ne remplacent pas une évaluation COCO officielle.
+
+Le projet bonus de reconnaissance faciale utilise OpenCV YuNet et SFace. Au premier lancement, le script `labs/projet_face/face_actor_demo.py` tente de télécharger les modèles OpenCV Zoo et l'image de référence de Keanu Reeves depuis Wikimedia Commons.
 
 ## Couverture Du Syllabus
 
@@ -149,3 +153,4 @@ Les métriques `ap50_simplified` et `map50_simplified` générées par les labs 
 | Détection temps réel vidéo | `JOUR-03.md`, extension vidéo/webcam avec mesure FPS |
 | Optimisation : architecture, batch size, learning rate, data augmentation, transfert learning | `JOUR-03.md`, extension optimisation et transfert learning |
 | Projet filé et présentation des résultats | Transitions entre jours, synthèse finale, livrables et recommandation modèle |
+| Projet bonus reconnaissance faciale | `PROJET-RECONNAISSANCE-FACIALE.md` et `labs/projet_face/face_actor_demo.py`, synthèse OpenCV, détection, embeddings, seuil et webcam |
