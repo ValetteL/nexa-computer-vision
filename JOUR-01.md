@@ -568,18 +568,14 @@ Ou $d_1$ est la distance au plus proche voisin et $d_2$ au second. Cela elimine 
 
 ### 8.3 Comparaison HOG vs SIFT
 
-```text
-┌────────────────────┬─────────────────────┬─────────────────────┐
-│                    │ HOG                 │ SIFT                │
-├────────────────────┼─────────────────────┼─────────────────────┤
-│ Type               │ Descripteur global  │ Points clés locaux  │
-│ Invariant échelle  │ Non                 │ Oui                 │
-│ Invariant rotation │ Non                 │ Oui                 │
-│ Dimension          │ Fixe (ex. : 3780)   │ Variable            │
-│ Vitesse            │ Rapide              │ Plus lent           │
-│ Usage principal    │ Détection d'objets  │ Matching / Recon.   │
-└────────────────────┴─────────────────────┴─────────────────────┘
-```
+| Critère | HOG | SIFT |
+|---|---|---|
+| Type | Descripteur global | Points clés locaux |
+| Invariance à l'échelle | Non | Oui |
+| Invariance à la rotation | Non | Oui |
+| Dimension | Fixe, par exemple 3780 | Variable selon le nombre de points clés |
+| Vitesse | Rapide | Plus lent |
+| Usage principal | Détection d'objets | Matching et reconnaissance locale |
 
 ![Schéma comparatif HOG et SIFT](outputs/jour1/figures/schema_05_hog_vs_sift.png)
 

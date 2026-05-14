@@ -88,35 +88,24 @@ Chaque cellule de la grille prédit :
 - $B$ boîtes englobantes (chacune avec 5 valeurs : $x, y, w, h, confiance$).
 - $C$ probabilités de classe conditionnelles.
 
-```text
-Image divisée en grille S x S (ex. : 13 x 13)
-┌───┬───┬───┬───┬───┐
-│ B │   │   │   │   │  <- Chaque cellule prédit
-├───┼───┼───┼───┼───┤     B boîtes + C classes
-│   │ B │   │   │   │
-├───┼───┼───┼───┼───┤
-│   │   │ B │   │   │  <- Le centre de la boîte
-├───┼───┼───┼───┼───┤     doit être dans cette cellule
-│   │   │   │ B │   │
-├───┼───┼───┼───┼───┤
-│   │   │   │   │ B │
-└───┴───┴───┴───┴───┘
-```
+![Schéma grille YOLO et prédiction par cellule](outputs/jour3/figures/schema_04_yolo_grid_prediction.png)
+
+**Lecture du schéma**
+- **Contexte** : ce schéma montre comment YOLO attribue la responsabilité d'une prédiction à une cellule de grille. Il complète la logique one-stage vue précédemment.
+- **Ce qu'on observe** : l'image est découpée en cellules. Chaque cellule peut prédire des boîtes, une confiance et des probabilités de classe, mais elle est surtout responsable des objets dont le centre tombe dans sa zone.
+- **Notion technique** : la sortie YOLO est dense : chaque position de la grille produit plusieurs hypothèses de boîtes. Les anchors et les scores permettent ensuite de sélectionner les prédictions pertinentes.
+- **Message à retenir** : YOLO transforme une image en ensemble de prédictions locales réparties sur une grille, ce qui explique sa rapidité.
 
 ### 4.4 Comparaison Faster R-CNN vs YOLO
 
-```text
-┌────────────────────┬─────────────────────┬─────────────────────┐
-│                    │ Faster R-CNN        │ YOLO                │
-├────────────────────┼─────────────────────┼─────────────────────┤
-│ Type               │ Two-stage           │ One-stage           │
-│ Précision          │ Excellente          │ Bonne à excellente  │
-│ Vitesse (FPS)      │ 5-15                │ 30-150              │
-│ Petits objets      │ Très bon            │ Bon                 │
-│ Mémoire            │ Élevée              │ Modérée             │
-│ Usage typique      │ Précision max       │ Temps réel          │
-└────────────────────┴─────────────────────┴─────────────────────┘
-```
+| Critère | Faster R-CNN | YOLO |
+|---|---|---|
+| Type | Two-stage | One-stage |
+| Précision | Excellente | Bonne à excellente |
+| Vitesse indicative | 5-15 FPS | 30-150 FPS |
+| Petits objets | Très bon | Bon |
+| Mémoire | Élevée | Modérée |
+| Usage typique | Précision maximale | Temps réel |
 
 ![Schéma comparaison Faster R-CNN et YOLO](outputs/jour3/figures/schema_03_comparaison_detecteurs.png)
 
@@ -130,18 +119,13 @@ Image divisée en grille S x S (ex. : 13 x 13)
 
 Le NMS élimine les détections redondantes : quand plusieurs boîtes se superposent, on ne garde que celle avec le score le plus élevé.
 
-```text
-Avant NMS                    Après NMS
-┌──────────────┐             ┌──────────────┐
-│  ┌──────┐    │             │  ┌──────┐    │
-│  │ 0.92 │    │             │  │ 0.92 │    │
-│  └──────┘    │   ---->     │  └──────┘    │
-│    ┌──────┐  │             │              │
-│    │ 0.78 │  │             │              │
-│    └──────┘  │             │              │
-└──────────────┘             └──────────────┘
-3 boîtes overlapées          1 boîte gardée
-```
+![Schéma Non-Maximum Suppression](outputs/jour3/figures/schema_05_nms.png)
+
+**Lecture du schéma**
+- **Contexte** : ce schéma montre pourquoi le NMS est nécessaire après une prédiction dense. Un détecteur peut proposer plusieurs boîtes très proches pour le même objet.
+- **Ce qu'on observe** : avant NMS, plusieurs boîtes se superposent avec des scores différents. Après NMS, seule la boîte la plus confiante est conservée lorsque le recouvrement dépasse un seuil.
+- **Notion technique** : le NMS trie les boîtes par score, garde la meilleure, puis supprime les boîtes restantes dont l'IoU avec elle est trop élevé.
+- **Message à retenir** : le NMS nettoie les prédictions redondantes pour produire une sortie lisible : idéalement une boîte par objet.
 
 ## 5. Fondements mathématiques
 

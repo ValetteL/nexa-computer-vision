@@ -72,20 +72,13 @@ Un CNN applique successivement des filtres (convolutions) qui détectent des mot
 - Chaque filtre détecte un motif spécifique (bord, texture, etc.).
 - Produit une *feature map* (mappe de caractéristiques).
 
-```text
-Image d'entrée (5x5)         Filtre (3x3)         Feature map (3x3)
-┌───┬───┬───┬───┬───┐       ┌───┬───┬───┐        ┌────┬────┬────┐
-│ 1 │ 0 │ 1 │ 0 │ 1 │       │ 1 │ 0 │-1 │        │  2 │ -2 │  0 │
-├───┼───┼───┼───┼───┤       ├───┼───┼───┤        ├────┼────┼────┤
-│ 0 │ 1 │ 0 │ 1 │ 0 │  *    │ 0 │ 1 │ 0 │  ->   │ -1 │  3 │ -1 │
-├───┼───┼───┼───┼───┤       ├───┼───┼───┤        ├────┼────┼────┤
-│ 1 │ 0 │ 1 │ 0 │ 1 │       │-1 │ 0 │ 1 │        │  0 │ -2 │  2 │
-├───┼───┼───┼───┼───┤       └───┴───┴───┘        └────┴────┴────┘
-│ 0 │ 1 │ 0 │ 1 │ 0 │
-├───┼───┼───┼───┼───┤        Calcul : somme élément par élément
-│ 1 │ 0 │ 1 │ 0 │ 1 │        du produit de Hadamard
-└───┴───┴───┴───┴───┘
-```
+![Schéma convolution 2D](outputs/jour2/figures/schema_05_convolution_2d.png)
+
+**Lecture du schéma**
+- **Contexte** : ce schéma remplace le calcul matriciel abstrait par une lecture visuelle de la convolution 2D. Il montre comment un filtre local produit une carte de caractéristiques.
+- **Ce qu'on observe** : une fenêtre 3x3 glisse sur l'image d'entrée 5x5. À chaque position, le filtre est appliqué sur la zone couverte, puis le résultat devient une valeur de la feature map.
+- **Notion technique** : le calcul correspond à un produit élément par élément entre la zone de l'image et le filtre, suivi d'une somme. Les mêmes poids du filtre sont réutilisés partout dans l'image.
+- **Message à retenir** : une convolution transforme une image en carte d'activation ; une forte valeur indique que le motif recherché par le filtre est présent à cet endroit.
 
 **Fonction d'activation ReLU**
 - `ReLU(x) = max(0, x)`
@@ -97,19 +90,13 @@ Image d'entrée (5x5)         Filtre (3x3)         Feature map (3x3)
 - Rend la représentation invariante aux petites translations.
 - Réduit le nombre de paramètres et le risque de surapprentissage.
 
-```text
-Feature map (4x4)           Max pooling (2x2, stride 2)    Résultat (2x2)
-┌───┬───┬───┬───┐           ┌───────┬───────┐              ┌───┬───┐
-│ 1 │ 3 │ 2 │ 4 │           │ max   │ max   │              │ 6 │ 8 │
-├───┼───┼───┼───┤    ->     │ 1,3   │ 2,4   │      ->     ├───┼───┤
-│ 6 │ 2 │ 8 │ 1 │           │ 6,2   │ 8,1   │              │ 7 │ 9 │
-├───┼───┼───┼───┤           └───────┴───────┘              └───┴───┘
-│ 3 │ 7 │ 1 │ 5 │           ┌───────┬───────┐
-├───┼───┼───┼───┤    ->     │ max   │ max   │
-│ 2 │ 4 │ 9 │ 3 │           │ 3,7   │ 1,5   │
-└───┴───┴───┴───┘           │ 2,4   │ 9,3   │
-                            └───────┴───────┘
-```
+![Schéma max pooling](outputs/jour2/figures/schema_06_max_pooling.png)
+
+**Lecture du schéma**
+- **Contexte** : ce schéma illustre le max pooling, utilisé après des convolutions pour réduire la taille des feature maps.
+- **Ce qu'on observe** : la feature map 4x4 est découpée en fenêtres 2x2. Chaque fenêtre est remplacée par sa valeur maximale, ce qui produit une sortie 2x2.
+- **Notion technique** : le pooling ne possède pas de poids appris. Il applique une règle fixe qui conserve les activations les plus fortes et réduit la résolution spatiale.
+- **Message à retenir** : le max pooling simplifie la représentation tout en gardant les signaux dominants, ce qui réduit le coût de calcul et apporte une certaine robustesse aux petits déplacements.
 
 ### 4.2 Architecture typique d'un CNN
 
