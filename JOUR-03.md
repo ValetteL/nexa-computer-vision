@@ -57,13 +57,7 @@ Contrairement à Faster R-CNN qui procède en deux étapes (propositions → cla
 - Des scores de confiance par objet.
 - Des probabilités par classe.
 
-```mermaid
-flowchart LR
-    A[Image] --> B[Backbone\nCNN]
-    B --> C[Neck\nFPN/PAN]
-    C --> D[Head\nDétection\nmulti-échelle]
-    D --> E[Boîtes + Classes\n+ Scores]
-```
+![Schéma principe YOLO](outputs/jour3/figures/schema_01_yolo_principe.png)
 
 ### 4.2 Architecture YOLOv3
 
@@ -73,17 +67,7 @@ YOLOv3 introduit trois innovations majeures :
 2. **Détection multi-échelle** : 3 sorties à différentes résolutions pour détecter des objets de toutes tailles.
 3. **Anchors améliorés** : 9 anchors (3 par échelle) appris par k-means sur COCO.
 
-```mermaid
-flowchart TD
-    A[Image 416x416] --> B[Darknet-53\nbackbone]
-    B --> C1[13x13 - grands objets]
-    B --> C2[26x26 - objets moyens]
-    B --> C3[52x52 - petits objets]
-    C1 --> D[Concaténation\nmulti-échelle]
-    C2 --> D
-    C3 --> D
-    D --> E[Boîtes + Classes]
-```
+![Schéma YOLOv3 multi-échelle](outputs/jour3/figures/schema_02_yolov3_multiscale.png)
 
 ### 4.3 Grille et prédiction par cellule
 
@@ -122,16 +106,7 @@ Image divisée en grille S x S (ex. : 13 x 13)
 └────────────────────┴─────────────────────┴─────────────────────┘
 ```
 
-```mermaid
-flowchart LR
-    A[Images] --> B[Faster R-CNN]
-    A --> C[YOLO]
-    B --> D[IoU_FR, mAP_FR, temps_FR]
-    C --> E[IoU_YOLO, mAP_YOLO, temps_YOLO]
-    D --> F[Comparaison\nvisualisation]
-    E --> F
-    F --> G[Recommandation\ncas d'usage]
-```
+![Schéma comparaison Faster R-CNN et YOLO](outputs/jour3/figures/schema_03_comparaison_detecteurs.png)
 
 ### 4.5 NMS — Non-Maximum Suppression
 

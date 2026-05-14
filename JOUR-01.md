@@ -16,7 +16,7 @@ Ce chapitre couvre les deux blocs du Jour 1 du syllabus officiel :
 - Produire des résultats reproductibles, mesurables et exploitables.
 
 **Résultat concret**
-En fin de chapitre, l'étudiant exécute un pipeline complet qui génère des scènes synthétiques, calcule l'IoU, extrait des descripteurs HOG et SIFT, et produit un rapport de métriques sauvegardé en JSON.
+En fin de chapitre, l'étudiant exécute un pipeline complet sur une image réelle : lecture OpenCV, conversion en niveaux de gris, histogrammes, égalisation, seuillage, contours, IoU contrôlée, gradients HOG et matching SIFT. Les résultats sont sauvegardés sous forme de figures et de métriques JSON.
 
 **Projet filé — introduction**
 Tout au long de ce module, un projet filé accompagne l'apprentissage. L'objectif final (Jour 3) est de construire un système de détection d'objets sur des images réelles, de l'évaluer avec des métriques standard (IoU, mAP), et de présenter les résultats.
@@ -69,15 +69,11 @@ pip install opencv-python numpy matplotlib
 
 ### 4.2 Schéma de positionnement des tâches
 
-```mermaid
-flowchart LR
-    A[Image brute] --> B[Classification]
-    A --> C[Détection]
-    C --> D[Reconnaissance]
-    B --> E[Classe globale]
-    C --> F[Boîtes + classes]
-    D --> G[Identité fine]
-```
+La même image peut être exploitée selon trois objectifs différents. Le passage de la classification à la reconnaissance augmente progressivement la précision attendue de la sortie.
+
+![Classification, détection et reconnaissance sur une image réelle](outputs/jour1/figures/01_task_comparison.png)
+
+![Schéma classification, détection et reconnaissance](outputs/jour1/figures/schema_01_taches_vision.png)
 
 **Lecture du schéma**
 - La classification donne une réponse globale à l'image entière.
@@ -105,15 +101,11 @@ flowchart LR
 
 ### 5.1 Les étapes
 
-```mermaid
-flowchart LR
-    A[Acquisition] --> B[Prétraitement]
-    B --> C[Extraction de caractéristiques]
-    C --> D[Apprentissage ou règles]
-    D --> E[Prédiction]
-    E --> F[Évaluation]
-    F --> G[Interprétation métier]
-```
+Le pipeline ci-dessous montre la chaîne utilisée dans le lab : une image réelle est transformée progressivement jusqu'à produire des informations exploitables par un système de détection.
+
+![Pipeline de vision sur image réelle](outputs/jour1/figures/02_cv_pipeline_real.png)
+
+![Schéma pipeline de vision par ordinateur](outputs/jour1/figures/schema_02_pipeline_vision.png)
 
 **Lecture du pipeline**
 1. **Acquisition** : capturer l'image (caméra, fichier, flux vidéo).
@@ -126,20 +118,15 @@ flowchart LR
 
 ### 5.2 Représentation numérique d'une image
 
-```text
-Image couleur (256 x 256 pixels, 3 canaux)
-┌─────────────────────────────────┐
-│ [R, V, B] [R, V, B] ...         │ <- ligne 0 (y=0)
-│ [R, V, B] [R, V, B] ...         │ <- ligne 1 (y=1)
-│  ...                            │
-│                                 │ <- ligne 255 (y=255)
-└─────────────────────────────────┘
-       ^
-       colonne 0 (x=0)
+Une image numérique est un tableau. En couleur, chaque pixel contient trois valeurs. OpenCV lit ces valeurs en ordre **BGR**, alors que Matplotlib les affiche généralement en **RGB**.
 
-Chaque pixel = 3 valeurs (0 à 255) : Rouge, Vert, Bleu
-Image niveaux de gris = 1 valeur par pixel (0 = noir, 255 = blanc)
-```
+![Représentation numérique d'un pixel sur image réelle](outputs/jour1/figures/03_image_representation_pixels.png)
+
+**À retenir**
+- Une image couleur OpenCV a une forme `(hauteur, largeur, 3)`.
+- Un pixel couleur contient trois intensités entre 0 et 255.
+- Une image en niveaux de gris a une forme `(hauteur, largeur)`.
+- Les coordonnées image sont généralement notées `(x, y)`, mais la forme NumPy est `(hauteur, largeur)`.
 
 ## 6. Manipuler des images avec OpenCV
 
@@ -200,19 +187,9 @@ x2 = cv2.resize(img, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
 
 L'histogramme répartit les valeurs de pixels par niveau d'intensité. C'est un outil essentiel pour analyser la luminosité et le contraste.
 
-```text
-Comptage
-  ^
-  |        ███
-  |       █████      <- pic de pixels sombres
-  |      ███████
-  |     ██████████
-  |    ████████████
-  |   ██████████████
-  |  ████████████████
-  +────────────────────────> Intensité (0-255)
-   noir                  blanc
-```
+Sur une vraie image, l'histogramme révèle immédiatement si l'information est concentrée dans les zones sombres, moyennes ou claires. Il permet aussi de comparer les canaux couleur.
+
+![Histogramme d'une image réelle](outputs/jour1/figures/04_histogram_real_image.png)
 
 ```python
 import cv2
@@ -244,6 +221,8 @@ plt.savefig("histogramme.png")  # Sauvegarde au lieu de plt.show()
 
 L'égalisation redistribue les intensités pour améliorer le contraste d'une image sous-exposée.
 
+![Égalisation d'histogramme avant/après](outputs/jour1/figures/05_equalization_before_after.png)
+
 ```python
 import cv2
 
@@ -270,14 +249,9 @@ print("Histogramme après : min =", gris_equalise.min(), "max =", gris_equalise.
 
 Le seuillage transforme une image en binaire : chaque pixel devient noir ou blanc selon un seuil.
 
-```text
-Avant seuillage (niveaux de gris)    Après seuillage (binaire)
-┌────────────┐                       ┌────────────┐
-│  50 120 200│                       │  0   0   255│
-│ 180  90  30│   seuil = 127   ->    │ 255  0   0  │
-│ 210 140  60│                       │ 255 255  0  │
-└────────────┘                       └────────────┘
-```
+Sur une image réelle, le choix du seuil influence fortement le résultat. Un seuil fixe est simple mais fragile ; Otsu estime automatiquement un seuil global ; le seuillage adaptatif varie localement selon la luminosité.
+
+![Comparaison de seuillages sur image réelle](outputs/jour1/figures/06_thresholding_comparison.png)
 
 ```python
 # Seuillage binaire simple
@@ -301,6 +275,8 @@ adaptatif = cv2.adaptiveThreshold(
 ### 6.6 Contours et extraction de boîtes
 
 Après le seuillage, l'étape naturelle est d'extraire les contours pour isoler les objets. C'est le lien direct avec la détection vue au Jour 2.
+
+![Contours et boîtes candidates sur image réelle](outputs/jour1/figures/07_contours_and_boxes.png)
 
 ```python
 import cv2
@@ -441,20 +417,9 @@ $$
 
 ### 7.4 Schéma visuel de l'IoU
 
-```text
-Boîte de référence (B_gt)     Boîte prédite (B_p)
-┌───────────────┐             ┌───────────────┐
-│               │             │               │
-│   ┌───────────┼──┐  ┌───────┼──────────┐    │
-│   │ INTERSEC- │  │  │       │          │    │
-│   │   TION    │  │  │       │          │    │
-│   └───────────┼──┘  └───────┼──────────┘    │
-│               │             │               │
-└───────────────┘             └───────────────┘
+La figure ci-dessous montre deux boîtes partiellement superposées. La zone violette correspond à l'intersection. L'union correspond à toute la surface couverte par les deux boîtes.
 
-         Union = |B_gt| + |B_p| - Intersection
-         IoU = Intersection / Union
-```
+![Visualisation de l'IoU avec intersection et union](outputs/jour1/figures/08_iou_visual_explanation.png)
 
 ### 7.5 Distance euclidienne entre descripteurs
 
@@ -478,20 +443,15 @@ On calcule l'écart entre chaque composante des deux vecteurs, on met au carré,
 
 HOG résume la structure globale des contours d'une image sous forme d'histogramme d'orientations de gradients.
 
+![Visualisation des gradients et principe HOG](outputs/jour1/figures/09_hog_gradient_visualization.png)
+
 **Fonctionnement**
 1. Calcul des gradients horizontaux et verticaux de l'image.
 2. Division de l'image en cellules (ex. : 8x8 pixels).
 3. Pour chaque cellule, histogramme des directions de gradient (ex. : 9 bins sur 0-180°).
 4. Normalisation par blocs de cellules pour la robustesse à la luminosité.
 
-```mermaid
-flowchart LR
-    A[Image] --> B[Calcul des\ngradients]
-    B --> C[Division en\ncellules 8x8]
-    C --> D[Histogramme\ndes orientations]
-    D --> E[Normalisation\npar blocs]
-    E --> F[Vecteur HOG\nfinal]
-```
+![Schéma pipeline HOG](outputs/jour1/figures/schema_03_hog_pipeline.png)
 
 **Points importants**
 - Sensible à la géométrie globale de l'objet.
@@ -503,20 +463,15 @@ flowchart LR
 
 SIFT détecte des points clés locaux invariants à l'échelle et à la rotation, puis calcule un descripteur autour de chaque point.
 
+![Matching SIFT entre image réelle et image transformée](outputs/jour1/figures/10_sift_keypoints_matching.png)
+
 **Fonctionnement**
 1. Détection de points clés à différentes échelles (Difference of Gaussians).
 2. Attribution d'une orientation dominante a chaque point cle.
 3. Calcul d'un descripteur 128 dimensions autour de chaque point.
 4. Matching par distance euclidienne avec le test de ratio de Lowe.
 
-```mermaid
-flowchart LR
-    A[Image] --> B[Difference of\nGaussians]
-    B --> C[Points clés\nmulti-échelle]
-    C --> D[Orientation\ndominante]
-    D --> E[Descripteur\n128D]
-    E --> F[Matching\nLowe ratio test]
-```
+![Schéma pipeline SIFT](outputs/jour1/figures/schema_04_sift_pipeline.png)
 
 **Test de ratio de Lowe**
 Pour chaque descripteur, on trouve les 2 plus proches voisins. Le match est valide si :
@@ -547,15 +502,7 @@ Ou $d_1$ est la distance au plus proche voisin et $d_2$ au second. Cela elimine 
 └────────────────────┴─────────────────────┴─────────────────────┘
 ```
 
-```mermaid
-flowchart LR
-    A[Image] --> B[HOG]
-    A --> C[SIFT]
-    B --> B1[Descripteur global\ncontours et structure]
-    C --> C1[Points clés locaux\nmatching robuste]
-    B1 --> D[Usage : baseline\nclassification]
-    C1 --> E[Usage : similarité\nlocale]
-```
+![Schéma comparatif HOG et SIFT](outputs/jour1/figures/schema_05_hog_vs_sift.png)
 
 ## 9. Exemples Python par concept
 
@@ -656,7 +603,8 @@ SIFT détecte automatiquement les points clés et calcule les descripteurs. Le m
 ### 10.1 Objectif du lab
 
 Construire, exécuter et analyser un pipeline mesurable complet qui :
-- génère des scènes synthétiques (rectangles et cercles),
+- exploite une image réelle cohérente avec la suite du module,
+- génère des figures professionnelles pour histogrammes, seuillage, contours, HOG et SIFT,
 - calcule l'IoU entre boîtes de référence et boîtes prédites,
 - extrait et compare des descripteurs HOG,
 - détecte et matche des points clés SIFT,
@@ -678,6 +626,16 @@ nexa-computer-vision/
     ├── metrics_minimal.json      # Metriques IoU seules
     └── figures/
         ├── jour1_overview.png    # Figure de synthese
+        ├── 01_task_comparison.png # Classification/détection/reconnaissance
+        ├── 02_cv_pipeline_real.png # Pipeline sur image réelle
+        ├── 03_image_representation_pixels.png # Pixel et valeurs RGB/BGR
+        ├── 04_histogram_real_image.png # Histogrammes réels
+        ├── 05_equalization_before_after.png # Égalisation
+        ├── 06_thresholding_comparison.png # Seuillages comparés
+        ├── 07_contours_and_boxes.png # Contours et boîtes
+        ├── 08_iou_visual_explanation.png # IoU visuelle
+        ├── 09_hog_gradient_visualization.png # Gradients HOG
+        ├── 10_sift_keypoints_matching.png # Matching SIFT
         ├── iou_vs_shift.png      # Courbe décalage vs IoU
         └── canny_edges.png       # Détection de contours
 ```
@@ -854,6 +812,7 @@ Les compétences acquises ce jour constituent le socle du Jour 2 :
 
 - Script exécuté sans erreur : `labs/jour1/day1_lab.py`.
 - Artefacts : `outputs/jour1/metrics.json`, `outputs/jour1/figures/jour1_overview.png`.
+- Figures de cours : `outputs/jour1/figures/01_task_comparison.png` à `outputs/jour1/figures/10_sift_keypoints_matching.png`.
 - Bonus : `outputs/jour1/figures/iou_vs_shift.png`, `outputs/jour1/figures/canny_edges.png`.
 - Note d'analyse courte (5 à 10 lignes) avec interprétation des mesures.
 

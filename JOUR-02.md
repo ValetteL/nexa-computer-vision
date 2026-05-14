@@ -57,16 +57,7 @@ Un réseau de neurones convolutif (CNN) est une architecture spécialisée dans 
 **Principe fondamental**
 Un CNN applique successivement des filtres (convolutions) qui détectent des motifs locaux : bords, textures, formes, puis des combinaisons de plus en plus complexes.
 
-```mermaid
-flowchart LR
-    A[Image\nentrée] --> B[Convolution\nfiltres]
-    B --> C[ReLU\nactivation]
-    C --> D[Pooling\nsous-échant.]
-    D --> E[Couches\nrépétées]
-    E --> F[Aplatissement\nFlatten]
-    F --> G[Couches\nfully connected]
-    G --> H[Classification\nsortie]
-```
+![Schéma principe CNN](outputs/jour2/figures/schema_01_cnn_principe.png)
 
 ### 4.2 Les couches fondamentales
 
@@ -116,20 +107,7 @@ Feature map (4x4)           Max pooling (2x2, stride 2)    Résultat (2x2)
 
 ### 4.2 Architecture typique d'un CNN
 
-```mermaid
-flowchart TD
-    A[Input 32x32x3] --> B[Conv 3x3, 32 filtres]
-    B --> C[ReLU]
-    C --> D[MaxPool 2x2]
-    D --> E[Conv 3x3, 64 filtres]
-    E --> F[ReLU]
-    F --> G[MaxPool 2x2]
-    G --> H[Flatten]
-    H --> I[FC 128]
-    I --> J[ReLU]
-    J --> K[FC 10 - softmax]
-    K --> L[Probabilités\npar classe]
-```
+![Schéma architecture CNN typique](outputs/jour2/figures/schema_02_architecture_cnn.png)
 
 **Lecture de l'architecture**
 - Les premières couches détectent des motifs simples (bords, coins).
@@ -141,11 +119,7 @@ flowchart TD
 
 La classification répond à « Qu'est-ce que c'est ? ». La détection répond à « Qu'est-ce que c'est ET où est-ce ? ».
 
-```mermaid
-flowchart LR
-    A[Classification] -->|"Quoi ?"| B[Classe unique]
-    C[Détection] -->|"Quoi + Où ?"| D[Boîtes + classes + scores]
-```
+![Schéma classification versus détection](outputs/jour2/figures/schema_03_classification_detection.png)
 
 **Évolution des architectures de détection**
 
@@ -162,16 +136,7 @@ Faster R-CNN combine deux réseaux :
 1. **RPN (Region Proposal Network)** : propose des régions susceptibles de contenir un objet.
 2. **Fast R-CNN detector** : classe et affine les propositions du RPN.
 
-```mermaid
-flowchart LR
-    A[Image] --> B[Backbone CNN\nResNet/VGG]
-    B --> C[Feature maps]
-    C --> D[RPN\npropositions]
-    C --> E[RoI Pooling]
-    D --> E
-    E --> F[Classification\n+ Régression boîtes]
-    F --> G[Boîtes finales\n+ classes + scores]
-```
+![Schéma architecture Faster R-CNN](outputs/jour2/figures/schema_04_faster_rcnn.png)
 
 **Lecture de l'architecture Faster R-CNN**
 - Le *backbone* (ResNet, VGG) extrait des feature maps de l'image.
