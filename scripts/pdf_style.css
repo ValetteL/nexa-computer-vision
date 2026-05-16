@@ -1,0 +1,406 @@
+/* ============================================================
+   NEXA Computer Vision Course — PDF Stylesheet
+   ============================================================ */
+
+/* --- Page Setup --- */
+@page {
+    size: A4;
+    margin: 2.5cm 2cm 2.5cm 2cm;
+    @bottom-center {
+        content: counter(page);
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 9pt;
+        color: #888;
+    }
+    @top-left {
+        content: "NEXA School — Computer Vision";
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 8pt;
+        color: #aaa;
+    }
+}
+
+@page :first {
+    margin: 0;
+    @bottom-center { content: none; }
+    @top-left { content: none; }
+}
+
+/* --- Base Typography --- */
+html {
+    font-size: 11pt;
+    line-height: 1.5;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #222;
+    counter-reset: chapter;
+}
+
+/* --- Cover Page --- */
+#cover {
+    width: 210mm;
+    height: 297mm;
+    background: linear-gradient(135deg, #0d1b4a 0%, #1a237e 40%, #283593 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    page-break-after: always;
+    margin: -2.5cm -2cm;
+    padding: 0;
+}
+
+.cover-content {
+    text-align: center;
+    color: white;
+    padding: 3cm;
+}
+
+.cover-overline {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 14pt;
+    letter-spacing: 6pt;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 2cm;
+}
+
+.cover-title {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 28pt;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 0.8cm 0;
+    color: white;
+}
+
+.cover-divider {
+    width: 5cm;
+    border: none;
+    border-top: 2px solid rgba(255,255,255,0.4);
+    margin: 0.8cm auto;
+}
+
+.cover-subtitle {
+    font-size: 16pt;
+    font-weight: 300;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 1.5cm;
+}
+
+.cover-author {
+    font-size: 12pt;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 0.3cm;
+}
+
+.cover-date {
+    font-size: 11pt;
+    color: rgba(255,255,255,0.5);
+}
+
+/* --- Table of Contents --- */
+#toc {
+    page-break-after: always;
+    padding-top: 1cm;
+}
+
+#toc h2 {
+    font-size: 20pt;
+    color: #1a237e;
+    border-bottom: 2px solid #1a237e;
+    padding-bottom: 0.3cm;
+    margin-bottom: 0.8cm;
+}
+
+#toc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#toc li {
+    padding: 0.15cm 0;
+    border-bottom: 1px dotted #ddd;
+    font-size: 10.5pt;
+}
+
+#toc li a {
+    color: #333;
+    text-decoration: none;
+}
+
+#toc li a::after {
+    content: leader(dotted) target-counter(attr(href), page);
+}
+
+#toc ul ul li {
+    padding-left: 1.5em;
+    font-size: 10pt;
+}
+
+#toc ul ul ul li {
+    padding-left: 3em;
+    font-size: 9.5pt;
+}
+
+/* --- Headings --- */
+h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    orphans: 4;
+    widows: 4;
+}
+
+h1 {
+    font-size: 24pt;
+    color: #1a237e;
+    page-break-before: always;
+    border-bottom: 3px solid #1a237e;
+    padding-bottom: 0.3cm;
+    margin-top: 0;
+    padding-top: 1cm;
+}
+
+h1:first-of-type {
+    page-break-before: avoid;
+}
+
+h2 {
+    font-size: 17pt;
+    color: #283593;
+    margin-top: 1.2cm;
+    margin-bottom: 0.4cm;
+}
+
+h3 {
+    font-size: 13pt;
+    color: #3949ab;
+    margin-top: 0.8cm;
+    margin-bottom: 0.3cm;
+}
+
+h4 {
+    font-size: 11.5pt;
+    color: #5c6bc0;
+    margin-top: 0.6cm;
+    margin-bottom: 0.2cm;
+}
+
+h5, h6 {
+    font-size: 11pt;
+    color: #7986cb;
+}
+
+/* --- Paragraphs & Text --- */
+p {
+    margin: 0.2cm 0;
+    text-align: justify;
+    orphans: 4;
+    widows: 4;
+}
+
+strong {
+    color: #1a237e;
+}
+
+/* --- Lists --- */
+ul, ol {
+    margin: 0.2cm 0;
+    padding-left: 1.2em;
+}
+
+li {
+    margin: 0.12cm 0;
+    orphans: 3;
+    widows: 3;
+    line-height: 1.4;
+}
+
+li > ul, li > ol {
+    margin: 0.05cm 0;
+}
+
+li strong, li b {
+    color: #1a237e;
+}
+
+/* --- Links --- */
+a {
+    color: #1565c0;
+    text-decoration: none;
+}
+
+/* --- Code Blocks --- */
+pre {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+    font-family: 'Consolas', 'Source Code Pro', 'Courier New', monospace;
+    font-size: 6.5pt;
+    line-height: 1.2;
+    padding: 0.25cm 0.2cm;
+    border-radius: 4px;
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-all !important;
+    page-break-inside: avoid;
+    margin: 0.25cm 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+pre.sourceCode {
+    border-left: 3px solid #4F81BD;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+    font-size: 6.5pt;
+    color: inherit;
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-all !important;
+}
+
+/* Hide Pandoc source code line number anchors */
+pre.sourceCode a {
+    display: none;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+code {
+    font-family: 'Consolas', 'Source Code Pro', 'Courier New', monospace;
+    font-size: 8.5pt;
+    background-color: #f0f0f0;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+/* Pandoc skylighting syntax highlighting overrides */
+span.kw { color: #c678dd; }  /* keywords */
+span.dt { color: #e5c07b; }  /* data types */
+span.dv { color: #d19a66; }  /* decimal values */
+span.bn { color: #d19a66; }  /* base-N numbers */
+span.fl { color: #d19a66; }  /* floats */
+span.ch { color: #98c379; }  /* chars */
+span.st { color: #98c379; }  /* strings */
+span.co { color: #7f848e; font-style: italic; }  /* comments */
+span.ot { color: #56b6c2; }  /* other keywords */
+span.al { color: #e06c75; }  /* alert */
+span.fu { color: #61afef; }  /* function names */
+span.re { color: #e06c75; }  /* region marker */
+span.er { color: #e06c75; }  /* error */
+span.cn { color: #e5c07b; }  /* constant */
+span.sc { color: #56b6c2; }  /* special char */
+span.ss { color: #98c379; }  /* special string */
+span.cf { color: #c678dd; }  /* control flow */
+span.op { color: #abb2bf; }  /* operators */
+span.va { color: #e06c75; }  /* variable */
+span.vs { color: #98c379; }  /* visual string */
+span.wa { color: #e5c07b; }  /* warning */
+
+/* --- Math (rendered as images) --- */
+img.formula-inline {
+    vertical-align: middle;
+    display: inline;
+    max-height: 1.3em;
+    width: auto;
+}
+
+img[src*="display_"] {
+    display: block;
+    margin: 0.35cm auto;
+    page-break-inside: avoid;
+    max-width: 85%;
+}
+
+/* --- Images --- */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0.3cm auto;
+    page-break-inside: avoid;
+}
+
+figure {
+    margin: 0.3cm 0;
+    text-align: center;
+    page-break-inside: avoid;
+}
+
+figcaption {
+    font-size: 9pt;
+    color: #666;
+    font-style: italic;
+    margin-top: 0.1cm;
+}
+
+/* --- Tables --- */
+table {
+    border-collapse: collapse;
+    margin: 0.4cm 0;
+    font-size: 9.5pt;
+    width: 100%;
+    page-break-inside: avoid;
+}
+
+table caption {
+    font-weight: bold;
+    margin-bottom: 0.2cm;
+    color: #1a237e;
+}
+
+thead {
+    background-color: #1a237e;
+    color: white;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 0.15cm 0.25cm;
+    text-align: left;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f5f5f5;
+}
+
+/* --- Blockquotes --- */
+blockquote {
+    border-left: 3px solid #4F81BD;
+    margin: 0.4cm 0;
+    padding: 0.2cm 0.5cm;
+    background-color: #f8f9ff;
+    color: #444;
+    font-style: italic;
+}
+
+/* --- Horizontal Rules --- */
+hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 0.5cm 0;
+}
+
+/* --- Utility --- */
+.page-break {
+    page-break-before: always;
+}
+
+.warning {
+    background-color: #fff3e0;
+    border-left: 3px solid #ff9800;
+    padding: 0.3cm 0.5cm;
+    margin: 0.3cm 0;
+}
+
+.info {
+    background-color: #e3f2fd;
+    border-left: 3px solid #2196f3;
+    padding: 0.3cm 0.5cm;
+    margin: 0.3cm 0;
+}
