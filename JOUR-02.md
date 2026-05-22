@@ -74,6 +74,11 @@ Un CNN applique successivement des filtres (convolutions) qui détectent des mot
 
 ![Schéma convolution 2D](outputs/jour2/figures/schema_05_convolution_2d.png)
 
+
+- Filtres :
+- <img width="600" height="239" alt="image" src="https://github.com/user-attachments/assets/cb175aa4-8f91-427e-b1fc-fd7d15199064" />
+ 
+
 **Lecture du schéma**
 - **Contexte** : ce schéma remplace le calcul matriciel abstrait par une lecture visuelle de la convolution 2D. Il montre comment un filtre local produit une carte de caractéristiques.
 - **Ce qu'on observe** : une fenêtre 3x3 glisse sur l'image d'entrée 5x5. À chaque position, le filtre est appliqué sur la zone couverte, puis le résultat devient une valeur de la feature map.
